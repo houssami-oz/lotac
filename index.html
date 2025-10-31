@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>MVP — PDF “Là où tout a commencé…”</title>
+  <title>Là où tout a commencé…</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- fonts + html2pdf -->
@@ -19,7 +19,6 @@
     * { box-sizing: border-box; }
     body { margin:0; padding:20px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
     .wrap { max-width:1200px; margin:0 auto; }
-    h1 { margin:0 0 16px; font-size:28px; font-weight:800; letter-spacing:.2px; }
 
     .grid { display:grid; gap:24px; grid-template-columns:1fr; }
     @media (min-width:1000px){ .grid { grid-template-columns:440px 1fr; } }
@@ -33,9 +32,8 @@
     .checkline { display:flex; align-items:center; gap:10px; margin:8px 0; }
     .checkline input[type="checkbox"] { width:auto; }
 
-    button { cursor:pointer; }
-    button.primary { background:var(--rouge); color:#fff; border:none; margin-top:14px; font-weight:700; }
-    button.secondary { background:#111; color:#fff; border:none; margin-top:10px; font-weight:700; }
+    button { cursor:pointer; font-weight:700; border:none; border-radius:10px; padding:12px 14px; }
+    button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:100%; }
 
     #preview {
       background: var(--rose);
@@ -45,6 +43,10 @@
       position: relative;
       overflow: hidden;
       min-height: 540px;
+      width: 794px; /* Format A4 en px */
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
     }
     .corner-deco {
       position:absolute; opacity:.10; pointer-events:none;
@@ -83,12 +85,14 @@
       display: none;
     }
 
+    @media (max-width:900px) {
+      #preview { width:100%; }
+    }
     @media print { body { background:#fff; } }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>mvp — vercel (api géocode + pdf ok)</h1>
 
   <div class="grid">
     <form id="f" autocomplete="on">
@@ -129,20 +133,17 @@
         <option value="star">étoile</option>
       </select>
 
-      <button class="primary" type="submit">voir l’aperçu</button>
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
-
-      <p class="tip">géocodage : <code>/api/geocode</code> • carte : <code>/api/staticmap</code> (base64, sans marker intégré).</p>
     </form>
 
     <section id="preview">
       <div class="corner-deco"></div>
       <h2 class="title">Là où tout a commencé…</h2>
       <p class="names" id="names">—</p>
-      <p class="meta" id="when"> </p>
-      <p class="meta" id="addr_line"> </p>
-      <p class="meta" id="city_line"> </p>
-      <p class="meta" id="coord_line"> </p>
+      <p class="meta" id="when"></p>
+      <p class="meta" id="addr_line"></p>
+      <p class="meta" id="city_line"></p>
+      <p class="meta" id="coord_line"></p>
 
       <div id="mapframe">
         <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -217,7 +218,6 @@
 
       $('names').textContent = `${p1} & ${p2}`;
 
-      // date
       let iso = "";
       if (showDate) {
         iso = toISO(($('date').value || '').trim());
@@ -226,21 +226,17 @@
         $('when').textContent = ' ';
       }
 
-      // géocode + carte
       const { lat, lon, city } = await geocodeServer(addr);
       const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
       const { dataUrl } = await mapRes.json();
       armImage(dataUrl);
 
-      // lignes affichées sans libellés
       $('addr_line').textContent  = showAddr   ? `${addr}` : ' ';
       $('city_line').textContent  = showCity   ? `${city || '—'}` : ' ';
       $('coord_line').textContent = showCoords ? `(${lat.toFixed(5)}, ${lon.toFixed(5)})` : ' ';
 
       setOverlay(style);
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
   }
 
   function debounce(fn, ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
@@ -257,9 +253,6 @@
     ['p1','p2','addr','date'].forEach(id => $(id).addEventListener('input', renderDebounced));
     ['style','showAddr','showCity','showCoords'].forEach(id => $(id).addEventListener('change', renderDebounced));
 
-    $('f').addEventListener('submit', (e) => { e.preventDefault(); renderPreview(); });
-
-    // valeurs par défaut (aperçu auto Sacré-Cœur)
     $('p1').value = 'Jacquie';
     $('p2').value = 'Michel';
     $('addr').value = 'Basilique du Sacré-Cœur, Paris';
@@ -267,16 +260,20 @@
     renderPreview();
   });
 
-  document.getElementById('dl').addEventListener('click', () => {
+  document.getElementById('dl').addEventListener('click', async () => {
     const el = document.getElementById('preview');
+    const prevWidth = el.style.width;
+    el.style.width = '794px'; // format A4
     const opt = {
-      margin: [10,10,10,10],
+      margin: 0,
       filename: 'la-ou-tout-a-commence.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, allowTaint: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      image: { type: 'jpeg', quality: 1 },
+      html2canvas: { scale: 2.5, useCORS: true, allowTaint: false, windowWidth: 794 },
+      jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: 'avoid-all' }
     };
-    html2pdf().from(el).set(opt).save();
+    await html2pdf().from(el).set(opt).save();
+    el.style.width = prevWidth;
   });
 </script>
 </body>
