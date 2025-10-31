@@ -121,28 +121,27 @@
       $('where').textContent = `Adresse : ${addr}`;
 
       // géocode
-      const { lat, lon, city } = await geocodeServer(addr);
+     const { lat, lon, city } = await geocodeServer(addr);
 
-      // récupère la carte en base64 (blindé html2pdf)
-      const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
-      if (!mapRes.ok) throw new Error('staticmap API error ' + mapRes.status);
-      const { dataUrl } = await mapRes.json();
-      console.log('static map dataUrl length:', dataUrl?.length);
+// appelle l’API base64
+const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
+if (!mapRes.ok) throw new Error('staticmap API error ' + mapRes.status);
+const { dataUrl } = await mapRes.json();
 
-      // configure l’image puis assigne la source
-      const img = $('mapimg');
-      img.crossOrigin = 'anonymous';
-      img.referrerPolicy = 'no-referrer';
-      img.decoding = 'async';
-      img.onload = () => {
-        $('dl').disabled = false; // bouton actif seulement après l’image
-      };
-      img.onerror = (e) => {
-        console.error('image error', e);
-        alert("la carte n'a pas pu se charger");
-        $('dl').disabled = false; // on te laisse exporter quand même
-      };
-      img.src = dataUrl;
+// prépare l’img AVANT d’assigner src
+const img = document.getElementById('mapimg');
+img.crossOrigin = 'anonymous';
+img.referrerPolicy = 'no-referrer';
+img.decoding = 'async';
+
+document.getElementById('dl').disabled = true;
+img.onload = () => { document.getElementById('dl').disabled = false; };
+img.onerror = () => {
+  alert("la carte n'a pas pu se charger");
+  document.getElementById('dl').disabled = false;
+};
+
+img.src = dataUrl;
 
       const coords = `(${lat.toFixed(5)}, ${lon.toFixed(5)})`;
       $('where').textContent = `Ville : ${city || '—'}  •  Coordonnées : ${coords}`;
