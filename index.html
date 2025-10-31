@@ -24,7 +24,7 @@
     h1 { margin:0 0 16px; font-size:28px; font-weight:800; letter-spacing:.2px; }
 
     .grid { display:grid; gap:24px; grid-template-columns:1fr; }
-    @media (min-width:1000px){ .grid { grid-template-columns:420px 1fr; } }
+    @media (min-width:1000px){ .grid { grid-template-columns:440px 1fr; } }
 
     /* panneau gauche */
     form { background:var(--card); padding:22px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
@@ -33,6 +33,9 @@
     input:focus, select:focus { outline: none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
     .row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
     .tip { font-size:12px; color:var(--gris); margin-top:10px; }
+    .checkline { display:flex; align-items:center; gap:10px; margin:8px 0; }
+    .checkline input[type="checkbox"] { width:auto; }
+
     button { cursor:pointer; }
     button.primary { background:var(--rouge); color:#fff; border:none; margin-top:14px; font-weight:700; }
     button.secondary { background:#111; color:#fff; border:none; margin-top:10px; font-weight:700; }
@@ -55,7 +58,7 @@
     }
     .title { font-family:'Dancing Script', cursive; font-size:40px; color:var(--rouge); text-align:center; margin:0 0 14px; }
     .names { text-align:center; font-size:22px; margin:2px 0 4px; font-weight:700; }
-    .meta  { text-align:center; color:var(--gris); margin:2px 0; }
+    .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height: 1.2em; }
     #mapframe {
       background: #fff;
       border-radius: 16px;
@@ -70,7 +73,8 @@
       border-radius:12px;
       min-height: 220px; /* skeleton sur mobile avant chargement */
     }
-    .heart { width:26px; height:26px; display:inline-block; margin-top:14px; }
+    .marker-preview { display:flex; justify-content:center; align-items:center; margin-top:14px; min-height: 30px; }
+    .marker { width:30px; height:30px; display:inline-block; background-size:contain; background-position:center; background-repeat:no-repeat; }
 
     @media print { body { background:#fff; } }
   </style>
@@ -83,23 +87,36 @@
     <!-- panneau gauche -->
     <form id="f" autocomplete="on">
       <div class="row">
-        <div><label for="p1">Prénom 1</label><input type="text" id="p1" placeholder="Émy" required /></div>
-        <div><label for="p2">Prénom 2</label><input type="text" id="p2" placeholder="Adrien" required /></div>
+        <div><label for="p1">Prénom 1</label><input type="text" id="p1" placeholder="Jacquie" required /></div>
+        <div><label for="p2">Prénom 2</label><input type="text" id="p2" placeholder="Michel" required /></div>
       </div>
 
       <label for="addr">Adresse de rencontre</label>
-      <input type="text" id="addr" placeholder="5 rue Montmartre, Paris" required />
+      <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required />
 
-      <label for="date">Date de rencontre (facultatif)</label>
-      <input
-        type="text"
-        id="date"
-        placeholder="jj/mm/aaaa"
-        inputmode="numeric"
-        autocomplete="off"
-      />
+      <div class="checkline">
+        <input type="checkbox" id="showDate" />
+        <label for="showDate" style="margin:0;">afficher la date</label>
+      </div>
+      <div id="dateRow" style="display:none;">
+        <label for="date">Date de rencontre (JJ/MM/AAAA)</label>
+        <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off" />
+      </div>
 
-      <label for="style">Style du marqueur</label>
+      <div class="checkline">
+        <input type="checkbox" id="showAddr" checked />
+        <label for="showAddr" style="margin:0;">afficher l’adresse</label>
+      </div>
+      <div class="checkline">
+        <input type="checkbox" id="showCity" checked />
+        <label for="showCity" style="margin:0;">afficher la ville</label>
+      </div>
+      <div class="checkline">
+        <input type="checkbox" id="showCoords" checked />
+        <label for="showCoords" style="margin:0;">afficher les coordonnées</label>
+      </div>
+
+      <label for="style">Style du curseur</label>
       <select id="style">
         <option value="heart" selected>cœur</option>
         <option value="pin">curseur</option>
@@ -109,7 +126,7 @@
       <button class="primary" type="submit">voir l’aperçu</button>
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
 
-      <p class="tip">vercel : géocodage via <code>/api/geocode</code>, carte via <code>/api/staticmap</code> (base64, compatible html2pdf).</p>
+      <p class="tip">géocodage : <code>/api/geocode</code> • carte : <code>/api/staticmap</code> (base64, compatible html2pdf).</p>
     </form>
 
     <!-- aperçu à droite (cible PDF) -->
@@ -117,14 +134,16 @@
       <div class="corner-deco"></div>
       <h2 class="title">Là où tout a commencé…</h2>
       <p class="names" id="names">—</p>
-      <p class="meta" id="when">—</p>
-      <p class="meta" id="where">—</p>
+      <p class="meta" id="when"> </p>
+      <p class="meta" id="addr_line"> </p>
+      <p class="meta" id="city_line"> </p>
+      <p class="meta" id="coord_line"> </p>
 
       <div id="mapframe">
         <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
       </div>
 
-      <div><span class="heart" id="heart"></span></div>
+      <div class="marker-preview"><span class="marker" id="marker"></span></div>
     </section>
   </div>
 </div>
@@ -162,15 +181,11 @@
     const [y,m,d] = iso.split('-');
     return `${d}/${m}/${y}`;
   }
-  document.addEventListener('DOMContentLoaded', () => {
+  function initDatePicker() {
     if (window.flatpickr) {
-      flatpickr('#date', {
-        dateFormat: 'd/m/Y',
-        allowInput: true,
-        locale: flatpickr.l10ns.fr,
-      });
+      flatpickr('#date', { dateFormat: 'd/m/Y', allowInput: true, locale: flatpickr.l10ns.fr });
     }
-  });
+  }
 
   /* ============ APIs ============ */
   async function geocodeServer(q) {
@@ -188,60 +203,94 @@
 
     $('dl').disabled = true;
     img.onload = () => { $('dl').disabled = false; };
-    img.onerror = (e) => {
-      console.error('image error', e);
-      alert("la carte n'a pas pu se charger");
-      $('dl').disabled = false;
-    };
+    img.onerror = () => { $('dl').disabled = false; };
 
     img.src = dataUrl; // assignation APRÈS onload/onerror
   }
 
-  /* ============ flux principal ============ */
-  $('f').addEventListener('submit', async (e) => {
-    e.preventDefault();
+  function setMarker(style) {
+    const el = $('marker');
+    el.style.backgroundImage = `url(${ICONS[style] || ICONS.heart})`;
+  }
 
-    const p1 = $('p1').value.trim();
-    const p2 = $('p2').value.trim();
-    const addr = $('addr').value.trim();
-    const rawDate = $('date').value.trim();  // JJ/MM/AAAA ou vide
-    const iso = toISO(rawDate);
-    const style = $('style').value;
-
-    if (!p1 || !p2 || !addr) {
-      alert('Merci de remplir au minimum : Prénom 1, Prénom 2 et Adresse.');
-      return;
-    }
-
+  /* ============ logique d’aperçu ============ */
+  async function renderPreview() {
     try {
-      $('names').textContent = `${p1} & ${p2}`;
-      $('when').textContent  = iso ? `Date : ${formatDateForPrint(iso)}` : ' ';
-      $('where').textContent = `Adresse : ${addr}`;
+      const p1 = $('p1').value.trim() || $('p1').placeholder;
+      const p2 = $('p2').value.trim() || $('p2').placeholder;
+      const addr = $('addr').value.trim() || $('addr').placeholder;
+      const showDate = $('showDate').checked;
+      const showAddr = $('showAddr').checked;
+      const showCity = $('showCity').checked;
+      const showCoords = $('showCoords').checked;
+      const style = $('style').value;
 
-      // géocodage serveur
+      // entêtes
+      $('names').textContent = `${p1} & ${p2}`;
+
+      // date facultative
+      let iso = "";
+      if (showDate) {
+        const raw = ($('date').value || "").trim();
+        iso = toISO(raw);
+        $('when').textContent = iso ? `Date : ${formatDateForPrint(iso)}` : ' ';
+      } else {
+        $('when').textContent = ' ';
+      }
+
+      // géocodage + carte
       const { lat, lon, city } = await geocodeServer(addr);
 
-      // carte base64 (blindé html2pdf) via /api/staticmap
       const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
-      if (!mapRes.ok) throw new Error('staticmap API error ' + mapRes.status);
       const { dataUrl } = await mapRes.json();
-      console.log('dataUrl length:', dataUrl?.length || 0);
-
       armImageWithDataUrl(dataUrl);
 
-      const coords = `(${lat.toFixed(5)}, ${lon.toFixed(5)})`;
-      $('where').textContent = `Ville : ${city || '—'}  •  Coordonnées : ${coords}`;
+      // lignes meta pilotées par les cases à cocher
+      $('addr_line').textContent  = showAddr  ? `Adresse : ${addr}` : ' ';
+      $('city_line').textContent  = showCity  ? `Ville : ${city || '—'}` : ' ';
+      $('coord_line').textContent = showCoords? `Coordonnées : (${lat.toFixed(5)}, ${lon.toFixed(5)})` : ' ';
 
-      $('heart').style.background = `url(${ICONS[style]}) no-repeat center/contain`;
-    } catch (err) {
-      console.error(err);
-      alert('Adresse introuvable ou carte indisponible.');
-      $('dl').disabled = false;
+      // curseur
+      setMarker(style);
+    } catch (e) {
+      console.error(e);
     }
+  }
+
+  // petit debounce pour éviter le spam d’appels
+  function debounce(fn, ms=500) {
+    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  }
+  const renderDebounced = debounce(renderPreview, 400);
+
+  /* ============ listeners ============ */
+  document.addEventListener('DOMContentLoaded', async () => {
+    initDatePicker();
+
+    // toggle affichage date (montre/masque le picker)
+    $('showDate').addEventListener('change', () => {
+      $('dateRow').style.display = $('showDate').checked ? 'block' : 'none';
+      renderDebounced();
+    });
+
+    // régénère à la volée quand on tape / change
+    ['p1','p2','addr','date'].forEach(id => $(id).addEventListener('input', renderDebounced));
+    ['style','showAddr','showCity','showCoords'].forEach(id => $(id).addEventListener('change', renderDebounced));
+
+    // bouton “voir l’aperçu”
+    $('f').addEventListener('submit', (e) => { e.preventDefault(); renderPreview(); });
+
+    // afficher une carte par défaut : Sacré-Cœur, Paris
+    $('p1').value = 'Jacquie';
+    $('p2').value = 'Michel';
+    $('addr').value = 'Basilique du Sacré-Cœur, Paris';
+    setMarker($('style').value);
+    renderPreview();
   });
 
-  $('dl').addEventListener('click', () => {
-    const el = $('preview');
+  // export PDF
+  document.getElementById('dl').addEventListener('click', () => {
+    const el = document.getElementById('preview');
     const opt = {
       margin: [10,10,10,10],
       filename: 'la-ou-tout-a-commence.pdf',
