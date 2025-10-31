@@ -5,8 +5,8 @@
   <title>MVP — PDF “Là où tout a commencé…”</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- html2pdf pour générer le PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-          integrity="sha512-YcsIP1Q7nM8L7T2a8K2m5r8R5pY0x8z8vTtqV2m7t9Qv6d9GQG8bqV6s1eJY8f8pWkRk+4zXkq1o3G3h3u3NnA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <style>
@@ -14,14 +14,24 @@
     body { margin:0; padding:20px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
     .wrap { max-width:980px; margin:0 auto; }
     h1 { margin:0 0 16px; font-size:26px; }
+
     .grid { display:grid; gap:20px; grid-template-columns:1fr; }
     @media (min-width:900px){ .grid { grid-template-columns:360px 1fr; } }
-    #preview { background:var(--rose); border-radius:16px; padding:28px; box-shadow:0 6px 16px rgba(0,0,0,.08); position:relative; overflow:hidden; }
+
+    #preview {
+      background: var(--rose);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+      position: relative;
+      overflow: hidden;
+    }
     .title { font-family:'Dancing Script', cursive; font-size:38px; color:var(--rouge); text-align:center; margin:0 0 10px; }
     .names { text-align:center; font-size:22px; margin:0 0 6px; }
-    .meta { text-align:center; color:var(--gris); margin:2px 0; }
+    .meta  { text-align:center; color:var(--gris); margin:2px 0; }
     #mapimg { width:100%; height:auto; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,.15); margin-top:14px; }
     .heart { width:26px; height:26px; display:inline-block; margin-top:10px; }
+
     form { background:#fff; padding:18px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.06); }
     label { display:block; font-weight:600; margin:10px 0 6px; }
     input, select, button { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; }
@@ -30,14 +40,27 @@
     .row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
     .tip { font-size:12px; color:var(--gris); }
     @media print { body { background:#fff; } }
-    @font-face { font-family:'Dancing Script'; font-style:normal; font-weight:400; src: local('Dancing Script'), url('https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_szLrYtI.woff2') format('woff2'); }
-    .corner-deco { position:absolute; opacity:.08; pointer-events:none; width:280px; height:280px; right:-60px; top:-60px; background: radial-gradient(circle at center, #e63946 40%, transparent 41%); filter: blur(22px); }
+
+    @font-face {
+      font-family:'Dancing Script';
+      font-style:normal;
+      font-weight:400;
+      src: local('Dancing Script'),
+           url('https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_szLrYtI.woff2') format('woff2');
+    }
+    .corner-deco {
+      position:absolute; opacity:.08; pointer-events:none;
+      width:280px; height:280px; right:-60px; top:-60px;
+      background: radial-gradient(circle at center, #e63946 40%, transparent 41%);
+      filter: blur(22px);
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>mvp — vercel patch (pdf + cors)</h1>
+  <h1>mvp — vercel (api géocode + pdf ok)</h1>
   <div class="grid">
+
     <form id="f">
       <div class="row">
         <div><label>Prénom 1</label><input type="text" id="p1" placeholder="Émy" required /></div>
@@ -55,7 +78,7 @@
       </select>
       <button class="primary" type="submit">voir l’aperçu</button>
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
-      <p class="tip">sur vercel, on passe la carte via un proxy CORS pour que html2pdf puisse l'intégrer proprement.</p>
+      <p class="tip">vercel : géocodage via <code>/api/geocode</code>, image OSM via proxy compatible CORS.</p>
     </form>
 
     <section id="preview">
@@ -67,6 +90,7 @@
       <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
       <div><span class="heart" id="heart"></span></div>
     </section>
+
   </div>
 </div>
 
@@ -79,19 +103,17 @@
 
   const $ = (id) => document.getElementById(id);
 
-  async function geocode(q) {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=1`;
-    const r = await fetch(url, { headers: { 'Accept-Language': 'fr' }});
-    const data = await r.json();
-    if (!data || !data.length) throw new Error('Adresse introuvable');
-    const { lat, lon, address } = data[0];
-    let city = address?.city || address?.town || address?.village || address?.municipality || address?.county || '';
-    return { lat: parseFloat(lat), lon: parseFloat(lon), city };
+  async function geocodeServer(q) {
+    const r = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+    if (!r.ok) throw new Error('Geocoding error');
+    return r.json();
   }
 
-  function formatDateISOToFr(iso) { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+  function formatDateISOToFr(iso) {
+    const [y,m,d] = iso.split('-');
+    return `${d}/${m}/${y}`;
+  }
 
-  // proxy CORS pour l'image de carte OSM
   function buildStaticOSMProxied(lat, lon, zoom=15, w=1100, h=650) {
     const path = `staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=${zoom}&size=${w}x${h}&markers=${lat},${lon},red-pushpin`;
     const encoded = encodeURIComponent(path);
@@ -114,7 +136,7 @@
       $('when').textContent  = `Date : ${formatDateISOToFr(date)}`;
       $('where').textContent = `Adresse : ${addr}`;
 
-      const { lat, lon, city } = await geocode(addr);
+      const { lat, lon, city } = await geocodeServer(addr);
       const staticUrl = buildStaticOSMProxied(lat, lon, 15, 1100, 650);
       const img = $('mapimg');
       img.crossOrigin = 'anonymous';
@@ -125,11 +147,10 @@
       $('where').textContent = `Ville : ${city || '—'}  •  Coordonnées : ${coords}`;
 
       $('heart').style.background = `url(${ICONS[style]}) no-repeat center/contain`;
-
       $('dl').disabled = false;
     } catch (err) {
       console.error(err);
-      alert('Adresse introuvable. Essaye d’ajouter la ville et le pays.');
+      alert('Adresse introuvable. Essaie d’ajouter la ville et le pays.');
       $('dl').disabled = false;
     }
   });
