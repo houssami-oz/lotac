@@ -5,178 +5,99 @@
   <title>MVP — PDF “Là où tout a commencé…”</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Leaflet (carte) -->
-  <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-          crossorigin=""></script>
-
-  <!-- html2pdf (génération PDF côté client) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
           integrity="sha512-YcsIP1Q7nM8L7T2a8K2m5r8R5pY0x8z8vTtqV2m7t9Qv6d9GQG8bqV6s1eJY8f8pWkRk+4zXkq1o3G3h3u3NnA=="
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
   <style>
-    :root {
-      --rose: #fff0f5;
-      --rouge: #c0392b;
-      --texte: #34495e;
-      --gris: #7f8c8d;
-    }
-    body {
-      margin: 0; padding: 20px; background: #fafafa; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color: var(--texte);
-    }
-    .wrap { max-width: 980px; margin: 0 auto; }
-    h1 { margin: 0 0 16px; font-size: 26px; }
-    .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
-    @media (min-width: 900px) {.grid { grid-template-columns: 360px 1fr; }}
-
-    /* carte + rendu romantique */
-    #preview {
-      background: var(--rose);
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 6px 16px rgba(0,0,0,.08);
-    }
-    .title {
-      font-family: 'Dancing Script', cursive;
-      font-size: 36px;
-      color: var(--rouge);
-      text-align: center;
-      margin: 0 0 10px;
-    }
-    .names { text-align: center; font-size: 22px; margin: 0 0 6px; }
-    .meta  { text-align: center; color: var(--gris); margin: 2px 0; }
-    #map   { width: 100%; height: 360px; border-radius: 12px; box-shadow: 0 6px 12px rgba(0,0,0,.15); margin-top: 14px; }
-    .heart { width: 26px; height: 26px; display: inline-block; margin-top: 10px; }
-
-    /* formulaire */
-    form { background: #fff; padding: 18px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
-    label { display:block; font-weight: 600; margin: 10px 0 6px; }
-    input, select, button {
-      width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box;
-    }
-    button.primary { background: var(--rouge); color: #fff; border: none; cursor: pointer; margin-top: 14px; }
-    button.secondary { background: #222; color: #fff; border: none; cursor: pointer; margin-top: 10px; }
-    .row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
-    .tip { font-size: 12px; color: var(--gris); }
-
-    /* zone A4 pour pdf (html2pdf prendra #preview) */
-    @media print { body { background: #fff; } }
-    @font-face {
-      font-family: 'Dancing Script';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Dancing Script'), url('https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_szLrYtI.woff2') format('woff2');
-    }
+    :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; }
+    body { margin:0; padding:20px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
+    .wrap { max-width:980px; margin:0 auto; }
+    h1 { margin:0 0 16px; font-size:26px; }
+    .grid { display:grid; gap:20px; grid-template-columns:1fr; }
+    @media (min-width:900px){ .grid { grid-template-columns:360px 1fr; } }
+    #preview { background:var(--rose); border-radius:16px; padding:28px; box-shadow:0 6px 16px rgba(0,0,0,.08); position:relative; overflow:hidden; }
+    .title { font-family:'Dancing Script', cursive; font-size:38px; color:var(--rouge); text-align:center; margin:0 0 10px; }
+    .names { text-align:center; font-size:22px; margin:0 0 6px; }
+    .meta { text-align:center; color:var(--gris); margin:2px 0; }
+    #mapimg { width:100%; height:auto; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,.15); margin-top:14px; }
+    .heart { width:26px; height:26px; display:inline-block; margin-top:10px; }
+    form { background:#fff; padding:18px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,.06); }
+    label { display:block; font-weight:600; margin:10px 0 6px; }
+    input, select, button { width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; }
+    button.primary { background:var(--rouge); color:#fff; border:none; cursor:pointer; margin-top:14px; }
+    button.secondary { background:#222; color:#fff; border:none; cursor:pointer; margin-top:10px; }
+    .row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+    .tip { font-size:12px; color:var(--gris); }
+    @media print { body { background:#fff; } }
+    @font-face { font-family:'Dancing Script'; font-style:normal; font-weight:400; src: local('Dancing Script'), url('https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_szLrYtI.woff2') format('woff2'); }
+    .corner-deco { position:absolute; opacity:.08; pointer-events:none; width:280px; height:280px; right:-60px; top:-60px; background: radial-gradient(circle at center, #e63946 40%, transparent 41%); filter: blur(22px); }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>mvp local — générer un pdf romantique</h1>
+  <h1>mvp — vercel patch (pdf + cors)</h1>
   <div class="grid">
-    <!-- Formulaire -->
     <form id="f">
       <div class="row">
-        <div>
-          <label>Prénom 1</label>
-          <input type="text" id="p1" placeholder="Jacquie" required />
-        </div>
-        <div>
-          <label>Prénom 2</label>
-          <input type="text" id="p2" placeholder="Michel" required />
-        </div>
+        <div><label>Prénom 1</label><input type="text" id="p1" placeholder="Émy" required /></div>
+        <div><label>Prénom 2</label><input type="text" id="p2" placeholder="Adrien" required /></div>
       </div>
-
       <label>Adresse de rencontre</label>
-      <input type="text" id="addr" placeholder="Palais de l'Elysée" required />
-
+      <input type="text" id="addr" placeholder="16 route de Rocbaron, La Seyne-sur-Mer" required />
       <label>Date de rencontre</label>
       <input type="date" id="date" required />
-
       <label>Style du marqueur</label>
       <select id="style">
         <option value="heart" selected>cœur</option>
         <option value="pin">curseur</option>
         <option value="star">étoile</option>
       </select>
-
       <button class="primary" type="submit">voir l’aperçu</button>
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
-      <p class="tip">...</p>
+      <p class="tip">sur vercel, on passe la carte via un proxy CORS pour que html2pdf puisse l'intégrer proprement.</p>
     </form>
 
-    <!-- Aperçu romantique (ce bloc sera exporté en PDF) -->
     <section id="preview">
+      <div class="corner-deco"></div>
       <h2 class="title">Là où tout a commencé…</h2>
       <p class="names" id="names">—</p>
       <p class="meta" id="when">—</p>
       <p class="meta" id="where">—</p>
-      <div id="map"></div>
+      <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
       <div><span class="heart" id="heart"></span></div>
     </section>
   </div>
 </div>
 
 <script>
-  // icônes SVG en data: URL (pour rester 100% offline/gratuit)
   const ICONS = {
-    heart: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2">
-        <path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/>
-      </svg>`),
-    pin: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2">
-        <path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/>
-      </svg>`),
-    star: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2">
-        <path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/>
-      </svg>`)
+    heart: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`),
+    pin: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`),
+    star: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`)
   };
-
-  // init carte
-  let map = L.map('map', { zoomControl: true }).setView([48.8566, 2.3522], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-  let marker; // sera créé après géocodage
 
   const $ = (id) => document.getElementById(id);
 
-  // géocode via Nominatim (gratuit)
   async function geocode(q) {
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=1`;
     const r = await fetch(url, { headers: { 'Accept-Language': 'fr' }});
     const data = await r.json();
     if (!data || !data.length) throw new Error('Adresse introuvable');
-    const { lat, lon, display_name, address } = data[0];
+    const { lat, lon, address } = data[0];
     let city = address?.city || address?.town || address?.village || address?.municipality || address?.county || '';
-    return { lat: parseFloat(lat), lon: parseFloat(lon), display_name, city, address };
+    return { lat: parseFloat(lat), lon: parseFloat(lon), city };
   }
 
-  function setMarker(lat, lon, kind) {
-    const icon = L.icon({
-      iconUrl: ICONS[kind] || ICONS.heart,
-      iconSize: [36, 36],
-      iconAnchor: [18, 36]
-    });
-    if (marker) { map.removeLayer(marker); }
-    marker = L.marker([lat, lon], { icon }).addTo(map);
+  function formatDateISOToFr(iso) { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+
+  // proxy CORS pour l'image de carte OSM
+  function buildStaticOSMProxied(lat, lon, zoom=15, w=1100, h=650) {
+    const path = `staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=${zoom}&size=${w}x${h}&markers=${lat},${lon},red-pushpin`;
+    const encoded = encodeURIComponent(path);
+    return `https://images.weserv.nl/?url=${encoded}`;
   }
 
-  function formatDateISOToFr(iso) {
-    // yyyy-mm-dd -> dd/mm/yyyy
-    const [y,m,d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  }
-
-  // soumission formulaire → maj aperçu
   $('f').addEventListener('submit', async (e) => {
     e.preventDefault();
     const p1 = $('p1').value.trim();
@@ -194,29 +115,33 @@
       $('where').textContent = `Adresse : ${addr}`;
 
       const { lat, lon, city } = await geocode(addr);
-      map.setView([lat, lon], 15);
-      setMarker(lat, lon, style);
+      const staticUrl = buildStaticOSMProxied(lat, lon, 15, 1100, 650);
+      const img = $('mapimg');
+      img.crossOrigin = 'anonymous';
+      img.referrerPolicy = 'no-referrer';
+      img.src = staticUrl;
 
       const coords = `(${lat.toFixed(5)}, ${lon.toFixed(5)})`;
       $('where').textContent = `Ville : ${city || '—'}  •  Coordonnées : ${coords}`;
+
       $('heart').style.background = `url(${ICONS[style]}) no-repeat center/contain`;
 
       $('dl').disabled = false;
     } catch (err) {
       console.error(err);
       alert('Adresse introuvable. Essaye d’ajouter la ville et le pays.');
+      $('dl').disabled = false;
     }
   });
 
-  // génération PDF A4 (prend #preview)
   $('dl').addEventListener('click', () => {
     const el = $('preview');
     const opt = {
-      margin:       [10, 10, 10, 10], // mm
-      filename:     'la-ou-tout-a-commence.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      margin: [10,10,10,10],
+      filename: 'la-ou-tout-a-commence.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, allowTaint: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().from(el).set(opt).save();
   });
