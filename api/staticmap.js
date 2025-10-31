@@ -1,47 +1,51 @@
 // /api/staticmap.js
 export default async function handler(req, res) {
-  const lat = req.query.lat;
-  const lon = req.query.lon;
-  const zoom = req.query.zoom || '15';
-  const w = req.query.w || '1100';
-  const h = req.query.h || '650';
+  const { lat, lon, zoom = '15', w = '1100', h = '650' } = req.query || {};
+  if (!lat || !lon) return res.status(400).json({ error: 'Missing lat/lon' });
 
-  if (!lat || !lon) {
-    res.status(400).json({ error: 'Missing lat/lon' });
-    return;
-  }
+  // 1) cible OSM directe
+  const osmUrl =
+    `https://staticmap.openstreetmap.de/staticmap.php` +
+    `?center=${encodeURIComponent(lat)},${encodeURIComponent(lon)}` +
+    `&zoom=${encodeURIComponent(zoom)}` +
+    `&size=${encodeURIComponent(w)}x${encodeURIComponent(h)}` +
+    `&markers=${encodeURIComponent(lat)},${encodeURIComponent(lon)},red-pushpin`;
 
-  // URL upstream OSM static map
-  const upstream = `https://staticmap.openstreetmap.de/staticmap.php?center=${encodeURIComponent(
-    lat
-  )},${encodeURIComponent(lon)}&zoom=${encodeURIComponent(
-    zoom
-  )}&size=${encodeURIComponent(w)}x${encodeURIComponent(
-    h
-  )}&markers=${encodeURIComponent(lat)},${encodeURIComponent(lon)},red-pushpin`;
+  // 2) fallback via weserv (proxy d'images, très robuste)
+  const weservUrl = `https://images.weserv.nl/?url=${encodeURIComponent(
+    'staticmap.openstreetmap.de/staticmap.php' +
+      `?center=${lat},${lon}&zoom=${zoom}&size=${w}x${h}&markers=${lat},${lon},red-pushpin`
+  )}`;
 
-  try {
-    const r = await fetch(upstream, {
+  async function fetchAsBuffer(url, label) {
+    const r = await fetch(url, {
       headers: {
-        // user-agent propre, ça évite certains blocages
-        'User-Agent': 'LOTAC/1.0 (+https://tondomaine.com; contact: toi@tondomaine.com)'
+        'User-Agent': 'LOTAC/1.0 (+https://lotac.vercel.app; contact: tonmail@domaine.com)',
+        'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
       },
       cache: 'no-store'
     });
+    if (!r.ok) throw new Error(`${label} HTTP ${r.status}`);
+    const ct = r.headers.get('content-type') || 'image/png';
+    const ab = await r.arrayBuffer();
+    return { buf: Buffer.from(ab), contentType: ct };
+  }
 
-    if (!r.ok) {
-      res.status(502).json({ error: 'Upstream static map error' });
-      return;
+  try {
+    // essai direct OSM
+    let payload;
+    try {
+      payload = await fetchAsBuffer(osmUrl, 'OSM');
+    } catch (e1) {
+      // fallback weserv
+      payload = await fetchAsBuffer(weservUrl, 'WESERV');
     }
 
-    const buf = Buffer.from(await r.arrayBuffer());
-    res.setHeader('Content-Type', 'image/png');
-    // permissif pour html2canvas/html2pdf
+    res.setHeader('Content-Type', payload.contentType);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    // petit cache CDN (10 min) pour accélérer
     res.setHeader('Cache-Control', 'public, max-age=600');
-    res.status(200).send(buf);
+    res.status(200).send(payload.buf);
   } catch (e) {
-    res.status(500).json({ error: 'Server error', message: String(e) });
+    res.status(502).json({ error: 'Upstream static map error', message: String(e) });
   }
 }
