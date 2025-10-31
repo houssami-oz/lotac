@@ -5,13 +5,11 @@
   <title>MVP — PDF “Là où tout a commencé…”</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- google fonts -->
+  <!-- fonts + html2pdf -->
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- html2pdf (sans SRI pour éviter le blocage) -->
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
-  <!-- flatpickr (mini calendrier) -->
+  <!-- flatpickr -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
@@ -26,7 +24,6 @@
     .grid { display:grid; gap:24px; grid-template-columns:1fr; }
     @media (min-width:1000px){ .grid { grid-template-columns:440px 1fr; } }
 
-    /* panneau gauche */
     form { background:var(--card); padding:22px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
     label { display:block; font-weight:700; margin:12px 0 6px; }
     input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:15px; }
@@ -40,7 +37,6 @@
     button.primary { background:var(--rouge); color:#fff; border:none; margin-top:14px; font-weight:700; }
     button.secondary { background:#111; color:#fff; border:none; margin-top:10px; font-weight:700; }
 
-    /* aperçu (cible PDF) */
     #preview {
       background: var(--rose);
       border-radius: 20px;
@@ -58,8 +54,10 @@
     }
     .title { font-family:'Dancing Script', cursive; font-size:40px; color:var(--rouge); text-align:center; margin:0 0 14px; }
     .names { text-align:center; font-size:22px; margin:2px 0 4px; font-weight:700; }
-    .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height: 1.2em; }
+    .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height:1.2em; }
+
     #mapframe {
+      position: relative;
       background: #fff;
       border-radius: 16px;
       padding: 10px;
@@ -71,10 +69,19 @@
       width:100%;
       height:auto;
       border-radius:12px;
-      min-height: 220px; /* skeleton sur mobile avant chargement */
+      min-height: 220px;
     }
-    .marker-preview { display:flex; justify-content:center; align-items:center; margin-top:14px; min-height: 30px; }
-    .marker { width:30px; height:30px; display:inline-block; background-size:contain; background-position:center; background-repeat:no-repeat; }
+    #markerOverlay {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.35));
+      display: none;
+    }
 
     @media print { body { background:#fff; } }
   </style>
@@ -84,7 +91,6 @@
   <h1>mvp — vercel (api géocode + pdf ok)</h1>
 
   <div class="grid">
-    <!-- panneau gauche -->
     <form id="f" autocomplete="on">
       <div class="row">
         <div><label for="p1">Prénom 1</label><input type="text" id="p1" placeholder="Jacquie" required /></div>
@@ -99,7 +105,7 @@
         <label for="showDate" style="margin:0;">afficher la date</label>
       </div>
       <div id="dateRow" style="display:none;">
-        <label for="date">Date de rencontre (JJ/MM/AAAA)</label>
+        <label for="date">Date (JJ/MM/AAAA)</label>
         <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off" />
       </div>
 
@@ -126,10 +132,9 @@
       <button class="primary" type="submit">voir l’aperçu</button>
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
 
-      <p class="tip">géocodage : <code>/api/geocode</code> • carte : <code>/api/staticmap</code> (base64, compatible html2pdf).</p>
+      <p class="tip">géocodage : <code>/api/geocode</code> • carte : <code>/api/staticmap</code> (base64, sans marker intégré).</p>
     </form>
 
-    <!-- aperçu à droite (cible PDF) -->
     <section id="preview">
       <div class="corner-deco"></div>
       <h2 class="title">Là où tout a commencé…</h2>
@@ -141,32 +146,24 @@
 
       <div id="mapframe">
         <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <img id="markerOverlay" alt="" />
       </div>
-
-      <div class="marker-preview"><span class="marker" id="marker"></span></div>
     </section>
   </div>
 </div>
 
 <script>
-  /* ============ icônes ============ */
-  const ICONS = {
-    heart: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2">
-        <path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/>
-      </svg>`),
-    pin: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2">
-        <path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/>
-      </svg>`),
-    star: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2">
-        <path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/>
-      </svg>`)
-  };
-  const $ = (id) => document.getElementById(id);
+  // icônes (SVG -> data URL)
+  function iconDataUrl(style) {
+    const svg = {
+      heart: `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`,
+      pin:   `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`,
+      star:  `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`
+    }[style] || '';
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
 
-  /* ============ dates (JJ/MM/AAAA facultatif) ============ */
+  const $ = (id) => document.getElementById(id);
   function toISO(dateStr) {
     if (!dateStr) return "";
     if (dateStr.includes('/')) {
@@ -174,7 +171,7 @@
       if (!dd || !mm || !yyyy) return "";
       return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
     }
-    return dateStr; // déjà ISO
+    return dateStr;
   }
   function formatDateForPrint(iso) {
     if (!iso) return "";
@@ -187,33 +184,26 @@
     }
   }
 
-  /* ============ APIs ============ */
   async function geocodeServer(q) {
     const r = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
     if (!r.ok) throw new Error('Geocoding error');
     return r.json(); // {lat, lon, city}
   }
 
-  /* ============ image & pdf ============ */
-  function armImageWithDataUrl(dataUrl) {
+  function armImage(dataUrl) {
     const img = $('mapimg');
-    img.crossOrigin = 'anonymous';
-    img.referrerPolicy = 'no-referrer';
-    img.decoding = 'async';
-
     $('dl').disabled = true;
     img.onload = () => { $('dl').disabled = false; };
     img.onerror = () => { $('dl').disabled = false; };
-
-    img.src = dataUrl; // assignation APRÈS onload/onerror
+    img.src = dataUrl;
+  }
+  function setOverlay(style) {
+    const el = $('markerOverlay');
+    const src = iconDataUrl(style);
+    if (src) { el.src = src; el.style.display = 'block'; }
+    else { el.style.display = 'none'; }
   }
 
-  function setMarker(style) {
-    const el = $('marker');
-    el.style.backgroundImage = `url(${ICONS[style] || ICONS.heart})`;
-  }
-
-  /* ============ logique d’aperçu ============ */
   async function renderPreview() {
     try {
       const p1 = $('p1').value.trim() || $('p1').placeholder;
@@ -225,70 +215,58 @@
       const showCoords = $('showCoords').checked;
       const style = $('style').value;
 
-      // entêtes
       $('names').textContent = `${p1} & ${p2}`;
 
-      // date facultative
+      // date
       let iso = "";
       if (showDate) {
-        const raw = ($('date').value || "").trim();
-        iso = toISO(raw);
-        $('when').textContent = iso ? `Date : ${formatDateForPrint(iso)}` : ' ';
+        iso = toISO(($('date').value || '').trim());
+        $('when').textContent = iso ? `${formatDateForPrint(iso)}` : ' ';
       } else {
         $('when').textContent = ' ';
       }
 
-      // géocodage + carte
+      // géocode + carte
       const { lat, lon, city } = await geocodeServer(addr);
-
       const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
       const { dataUrl } = await mapRes.json();
-      armImageWithDataUrl(dataUrl);
+      armImage(dataUrl);
 
-      // lignes meta pilotées par les cases à cocher
-      $('addr_line').textContent  = showAddr  ? `Adresse : ${addr}` : ' ';
-      $('city_line').textContent  = showCity  ? `Ville : ${city || '—'}` : ' ';
-      $('coord_line').textContent = showCoords? `Coordonnées : (${lat.toFixed(5)}, ${lon.toFixed(5)})` : ' ';
+      // lignes affichées sans libellés
+      $('addr_line').textContent  = showAddr   ? `${addr}` : ' ';
+      $('city_line').textContent  = showCity   ? `${city || '—'}` : ' ';
+      $('coord_line').textContent = showCoords ? `(${lat.toFixed(5)}, ${lon.toFixed(5)})` : ' ';
 
-      // curseur
-      setMarker(style);
+      setOverlay(style);
     } catch (e) {
       console.error(e);
     }
   }
 
-  // petit debounce pour éviter le spam d’appels
-  function debounce(fn, ms=500) {
-    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-  }
+  function debounce(fn, ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
   const renderDebounced = debounce(renderPreview, 400);
 
-  /* ============ listeners ============ */
   document.addEventListener('DOMContentLoaded', async () => {
     initDatePicker();
 
-    // toggle affichage date (montre/masque le picker)
     $('showDate').addEventListener('change', () => {
       $('dateRow').style.display = $('showDate').checked ? 'block' : 'none';
       renderDebounced();
     });
 
-    // régénère à la volée quand on tape / change
     ['p1','p2','addr','date'].forEach(id => $(id).addEventListener('input', renderDebounced));
     ['style','showAddr','showCity','showCoords'].forEach(id => $(id).addEventListener('change', renderDebounced));
 
-    // bouton “voir l’aperçu”
     $('f').addEventListener('submit', (e) => { e.preventDefault(); renderPreview(); });
 
-    // afficher une carte par défaut : Sacré-Cœur, Paris
+    // valeurs par défaut (aperçu auto Sacré-Cœur)
     $('p1').value = 'Jacquie';
     $('p2').value = 'Michel';
     $('addr').value = 'Basilique du Sacré-Cœur, Paris';
-    setMarker($('style').value);
+    setOverlay($('style').value);
     renderPreview();
   });
 
-  // export PDF
   document.getElementById('dl').addEventListener('click', () => {
     const el = document.getElementById('preview');
     const opt = {
