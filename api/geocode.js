@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       headers: {
         'Accept-Language': 'fr',
         // le User-Agent est obligatoire selon la politique d'utilisation de Nominatim
-        'User-Agent': 'LOTAC/1.0 (+https://example.com; contact: contact@example.com)'
+        'User-Agent': 'LOTAC/1.0 (+https://lotac.vercel.app; contact: contact@lotac.com)'
       },
       cache: 'no-store'
     });
