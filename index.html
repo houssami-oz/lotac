@@ -130,11 +130,13 @@
       $('where').textContent = `Adresse : ${addr}`;
 
       const { lat, lon, city } = await geocodeServer(addr);
-      const staticUrl = buildStaticOSMProxied(lat, lon, 15, 1100, 650);
+      const r = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
+      const { dataUrl } = await r.json();
+      img.src = dataUrl;
+
       const img = $('mapimg');
       img.crossOrigin = 'anonymous';
       img.referrerPolicy = 'no-referrer';
-      img.src = staticUrl;
 
       const coords = `(${lat.toFixed(5)}, ${lon.toFixed(5)})`;
       $('where').textContent = `Ville : ${city || '—'}  •  Coordonnées : ${coords}`;
