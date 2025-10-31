@@ -1,6 +1,15 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <!-- couleurs barre d'adresse et iOS -->
+<meta name="theme-color" content="#c0392b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+
+<!-- manifest PWA -->
+<link rel="manifest" href="/manifest.json">
+
   <meta charset="utf-8" />
   <title>Là où tout a commencé…</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -89,6 +98,22 @@
       #preview { width:100%; }
     }
     @media print { body { background:#fff; } }
+
+    /* affiner les tailles sur mobile */
+@media (max-width: 640px) {
+  form { padding:16px; }
+  .row { grid-template-columns:1fr; }
+  .title { font-size:34px; }
+  .names { font-size:20px; }
+  #mapframe { padding:8px; }
+  #markerOverlay { width:30px; height:30px; }
+}
+
+/* améliore le scroll quand le clavier mobile s’ouvre */
+html, body { height:100%; overscroll-behavior: contain; }
+input, select, button { font-size:16px; } /* évite le zoom iOS sur inputs */
+
+    
   </style>
 </head>
 <body>
@@ -134,6 +159,8 @@
       </select>
 
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
+      <button class="secondary" type="button" id="install" style="background:#2d3436">installer l’app</button>
+
     </form>
 
     <section id="preview">
@@ -275,6 +302,41 @@
     await html2pdf().from(el).set(opt).save();
     el.style.width = prevWidth;
   });
+
+  // enregistre le service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(console.error);
+    });
+  }
+
+  // bouton installer (PWA add to home)
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('install');
+  if (installBtn) installBtn.style.display = 'none';
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'block';
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+      console.log('PWA install:', outcome);
+    });
+  }
+
+  // iOS: masquer le bouton si déjà en mode standalone
+  if (window.navigator.standalone) {
+    if (installBtn) installBtn.style.display = 'none';
+  }
+
 </script>
 </body>
 </html>
