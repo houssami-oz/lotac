@@ -2,12 +2,12 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
   <title>MVP — PDF “Là où tout a commencé…”</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- html2pdf pour générer le PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
   <style>
     :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; }
@@ -26,7 +26,7 @@
       position: relative;
       overflow: hidden;
     }
-    .title { font-family:'Dancing Script', cursive; font-size:38px; color:var(--rouge); text-align:center; margin:0 0 10px; }
+    .title { font-family:' Script', cursive; font-size:38px; color:var(--rouge); text-align:center; margin:0 0 10px; }
     .names { text-align:center; font-size:22px; margin:0 0 6px; }
     .meta  { text-align:center; color:var(--gris); margin:2px 0; }
     #mapimg { width:100%; height:auto; border-radius:12px; box-shadow:0 6px 12px rgba(0,0,0,.15); margin-top:14px; }
@@ -41,13 +41,6 @@
     .tip { font-size:12px; color:var(--gris); }
     @media print { body { background:#fff; } }
 
-    @font-face {
-      font-family:'Dancing Script';
-      font-style:normal;
-      font-weight:400;
-      src: local('Dancing Script'),
-           url('https://fonts.gstatic.com/s/dancingscript/v24/If2RXTr6YS-zF4S-kcSWSVi_szLrYtI.woff2') format('woff2');
-    }
     .corner-deco {
       position:absolute; opacity:.08; pointer-events:none;
       width:280px; height:280px; right:-60px; top:-60px;
