@@ -94,13 +94,31 @@
     star:  'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`)
   };
   const $ = (id) => document.getElementById(id);
+  const formatDateISOToFr = iso => { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
 
   async function geocodeServer(q) {
     const r = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
     if (!r.ok) throw new Error('Geocoding error');
     return r.json();
   }
-  const formatDateISOToFr = iso => { const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; };
+
+  // bouton télécharger -> seulement quand l’image est vraiment chargée
+  function armImage(dataUrl) {
+    const img = $('mapimg');
+    img.crossOrigin = 'anonymous';
+    img.referrerPolicy = 'no-referrer';
+    img.decoding = 'async';
+
+    $('dl').disabled = true;
+    img.onload = () => { $('dl').disabled = false; };
+    img.onerror = (e) => {
+      console.error('image error', e);
+      alert("la carte n'a pas pu se charger");
+      $('dl').disabled = false;
+    };
+
+    img.src = dataUrl;     // <<< assignation APRÈS la définition de img + des handlers
+  }
 
   $('f').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -113,44 +131,27 @@
     if (!p1 || !p2 || !addr || !date) return alert('Merci de remplir tous les champs.');
 
     try {
-      // désactive le bouton tant que l’image n’est pas chargée
-      $('dl').disabled = true;
-
       $('names').textContent = `${p1} & ${p2}`;
       $('when').textContent  = `Date : ${formatDateISOToFr(date)}`;
       $('where').textContent = `Adresse : ${addr}`;
 
-      // géocode
-     const { lat, lon, city } = await geocodeServer(addr);
+      const { lat, lon, city } = await geocodeServer(addr);
 
-// appelle l’API base64
-const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
-if (!mapRes.ok) throw new Error('staticmap API error ' + mapRes.status);
-const { dataUrl } = await mapRes.json();
+      // récupère une image base64 depuis ton API (blindé html2pdf)
+      const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
+      if (!mapRes.ok) throw new Error('staticmap API error ' + mapRes.status);
+      const { dataUrl } = await mapRes.json();
+      console.log('dataUrl length:', dataUrl?.length);  // aide debug
 
-// prépare l’img AVANT d’assigner src
-const img = document.getElementById('mapimg');
-img.crossOrigin = 'anonymous';
-img.referrerPolicy = 'no-referrer';
-img.decoding = 'async';
-
-document.getElementById('dl').disabled = true;
-img.onload = () => { document.getElementById('dl').disabled = false; };
-img.onerror = () => {
-  alert("la carte n'a pas pu se charger");
-  document.getElementById('dl').disabled = false;
-};
-
-img.src = dataUrl;
+      armImage(dataUrl);
 
       const coords = `(${lat.toFixed(5)}, ${lon.toFixed(5)})`;
       $('where').textContent = `Ville : ${city || '—'}  •  Coordonnées : ${coords}`;
 
-      // icône choisie
       $('heart').style.background = `url(${ICONS[style]}) no-repeat center/contain`;
     } catch (err) {
       console.error(err);
-      alert('Adresse introuvable ou carte indisponible. Essaie d’ajouter la ville et le pays.');
+      alert('Adresse introuvable ou carte indisponible.');
       $('dl').disabled = false;
     }
   });
