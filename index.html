@@ -37,14 +37,28 @@
     .grid > * { min-width:0; } /* évite overflow sur mobile */
     @media (min-width:1000px){ .grid { gap:24px; grid-template-columns:440px 1fr; } }
 
-    form { background:var(--card); padding:18px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
-    label { display:block; font-weight:700; margin:12px 0 6px; }
-    input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:16px; }
-    input:focus, select:focus { outline:none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
-    .row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
-    .checkline { display:flex; align-items:center; gap:10px; margin:8px 0; }
-    button { cursor:pointer; font-weight:700; border:none; border-radius:10px; padding:12px 14px; }
-    button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:100%; }
+    /* --- form layout --- */
+form { background:var(--card); padding:18px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
+label { display:block; font-weight:700; margin:12px 0 6px; }
+input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:16px; }
+input:focus, select:focus { outline:none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
+.row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+@media (max-width:640px){ .row{ grid-template-columns:1fr; } }
+
+/* --- checkboxes alignés à gauche, propres --- */
+.checks { display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; margin:10px 0 6px; }
+@media (max-width:640px){ .checks{ grid-template-columns:1fr; } }
+
+.checkline {
+  display:flex; align-items:center; justify-content:flex-start;
+  gap:10px; margin:6px 0; font-size:15px; line-height:1.2;
+}
+.checkline input[type="checkbox"]{ transform:scale(1.15); accent-color:var(--rouge); }
+.checkline label{ margin:0; font-weight:500; color:var(--texte); }
+
+/* boutons */
+button { cursor:pointer; font-weight:700; border:none; border-radius:10px; padding:12px 14px; }
+button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:100%; }
 
     /* aperçu à l’écran : fluide (pas de largeur fixe qui cause un scroll horizontal) */
     #preview {
@@ -82,34 +96,59 @@
 <div class="wrap">
   <div class="grid">
     <form id="f" autocomplete="on">
-      <div class="row">
-        <div><label for="p1">Prénom 1</label><input type="text" id="p1" placeholder="Jacquie" required></div>
-        <div><label for="p2">Prénom 2</label><input type="text" id="p2" placeholder="Michel" required></div>
-      </div>
+  <div class="row">
+    <div>
+      <label for="p1">Prénom 1</label>
+      <input type="text" id="p1" placeholder="Jacquie" required>
+    </div>
+    <div>
+      <label for="p2">Prénom 2</label>
+      <input type="text" id="p2" placeholder="Michel" required>
+    </div>
+  </div>
 
-      <label for="addr">Adresse de rencontre</label>
-      <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required>
+  <label for="addr">Adresse de rencontre</label>
+  <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required>
 
-      <div class="checkline"><input type="checkbox" id="showDate"><label for="showDate" style="margin:0;">afficher la date</label></div>
-      <div id="dateRow" style="display:none;">
-        <label for="date">Date (JJ/MM/AAAA)</label>
-        <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off">
-      </div>
+  <!-- options d’affichage -->
+  <div class="checks" role="group" aria-label="Options d’affichage">
+    <div class="checkline">
+      <input type="checkbox" id="showDate" />
+      <label for="showDate">afficher la date</label>
+    </div>
 
-      <div class="checkline"><input type="checkbox" id="showAddr" checked><label for="showAddr" style="margin:0;">afficher l’adresse</label></div>
-      <div class="checkline"><input type="checkbox" id="showCity" checked><label for="showCity" style="margin:0;">afficher la ville</label></div>
-      <div class="checkline"><input type="checkbox" id="showCoords" checked><label for="showCoords" style="margin:0;">afficher les coordonnées</label></div>
+    <div class="checkline">
+      <input type="checkbox" id="showAddr" checked />
+      <label for="showAddr">afficher l’adresse</label>
+    </div>
 
-      <label for="style">Style du curseur</label>
-      <select id="style">
-        <option value="heart" selected>cœur</option>
-        <option value="pin">curseur</option>
-        <option value="star">étoile</option>
-      </select>
+    <div class="checkline">
+      <input type="checkbox" id="showCity" checked />
+      <label for="showCity">afficher la ville</label>
+    </div>
 
-      <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
-      <button class="secondary" type="button" id="install" style="background:#2d3436">installer l’app</button>
-    </form>
+    <div class="checkline">
+      <input type="checkbox" id="showCoords" checked />
+      <label for="showCoords">afficher les coordonnées</label>
+    </div>
+  </div>
+
+  <!-- champ date (affiché uniquement si “afficher la date” est coché) -->
+  <div id="dateRow" style="display:none;">
+    <label for="date">Date (JJ/MM/AAAA)</label>
+    <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off">
+  </div>
+
+  <label for="style">Style du curseur</label>
+  <select id="style">
+    <option value="heart" selected>cœur</option>
+    <option value="pin">curseur</option>
+    <option value="star">étoile</option>
+  </select>
+
+  <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
+  <button class="secondary" type="button" id="install" style="background:#2d3436">installer l’app</button>
+</form>
 
     <section id="preview">
       <div class="corner-deco"></div>
