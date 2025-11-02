@@ -1,27 +1,27 @@
-// /api/geocode.js
+export const config = { runtime: 'nodejs' };
+
+const UA = 'LOTAC/1.0 (+https://lotac.vercel.app)';
+
 export default async function handler(req, res) {
-  const q = req.query.q || '';
-  if (!q) return res.status(400).json({ error: 'Missing q' });
-
   try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=1`;
-    const r = await fetch(url, {
-      headers: {
-        'Accept-Language': 'fr',
-        'User-Agent': 'LOTAC/1.0 (+https://lotac.vercel.app; contact: contact@lotac.vercel.app)'
-      },
-      cache: 'no-store'
-    });
-    if (!r.ok) return res.status(502).json({ error: 'Upstream error', status: r.status });
+    const q = (req.query?.q || '').toString().trim();
+    if (!q) return res.status(400).json({ error: 'missing q' });
 
-    const data = await r.json();
-    if (!Array.isArray(data) || data.length === 0) return res.status(404).json({ error: 'Not found' });
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`;
+    const r = await fetch(url, { headers: { 'User-Agent': UA }, cache: 'no-store' });
+    if (!r.ok) throw new Error('geocode http ' + r.status);
+    const arr = await r.json();
+    if (!arr?.length) return res.status(404).json({ error: 'not found' });
 
-    const { lat, lon, address } = data[0];
-    const city = address?.city || address?.town || address?.village || address?.municipality || address?.county || '';
+    const { lat, lon, display_name } = arr[0];
+    // ville best-effort
+    let city = '';
+    const m = display_name.split(',').map(s=>s.trim());
+    if (m.length >= 3) city = m[m.length-3]; // heuristique
+
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json({ lat: parseFloat(lat), lon: parseFloat(lon), city });
   } catch (e) {
-    res.status(500).json({ error: 'Server error', message: e.message });
+    res.status(500).json({ error: 'server', message: String(e) });
   }
 }

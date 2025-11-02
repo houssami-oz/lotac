@@ -1,30 +1,32 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <!-- couleurs barre d'adresse et iOS -->
-<meta name="theme-color" content="#c0392b">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="/icons/icon-180.png">
-
-<!-- manifest PWA TEST-->
-<link rel="manifest" href="/manifest.json">
-
   <meta charset="utf-8" />
-  <title>Là où tout a commencé…</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Là où tout a commencé…</title>
 
-  <!-- fonts + html2pdf -->
+  <!-- pwa -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LOTAC">
+  <meta name="application-name" content="LOTAC">
+  <meta name="theme-color" content="#c0392b">
+  <meta name="background-color" content="#fff0f5">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- fontes / libs -->
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-
-  <!-- flatpickr -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
 
   <style>
-    :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; --card:#ffffff; }
+    :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; --card:#ffffff; --A4w:794px; --A4h:1123px; }
     * { box-sizing: border-box; }
     body { margin:0; padding:20px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
     .wrap { max-width:1200px; margin:0 auto; }
@@ -35,121 +37,53 @@
     form { background:var(--card); padding:22px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
     label { display:block; font-weight:700; margin:12px 0 6px; }
     input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:15px; }
-    input:focus, select:focus { outline: none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
+    input:focus, select:focus { outline:none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
     .row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
-    .tip { font-size:12px; color:var(--gris); margin-top:10px; }
     .checkline { display:flex; align-items:center; gap:10px; margin:8px 0; }
-    .checkline input[type="checkbox"] { width:auto; }
-
     button { cursor:pointer; font-weight:700; border:none; border-radius:10px; padding:12px 14px; }
     button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:100%; }
 
     #preview {
-      background: var(--rose);
-      border-radius: 20px;
-      padding: 30px 28px 42px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.10);
-      position: relative;
-      overflow: hidden;
-      min-height: 540px;
-      width: 794px; /* Format A4 en px */
-      max-width: 100%;
-      margin-left: auto;
-      margin-right: auto;
+      width:var(--A4w); max-width:100%; margin:0 auto;
+      background:var(--rose); border-radius:20px; padding:30px 28px 42px;
+      box-shadow:0 10px 30px rgba(0,0,0,.10); position:relative; overflow:hidden; min-height:540px;
     }
-    .corner-deco {
-      position:absolute; opacity:.10; pointer-events:none;
-      width:420px; height:420px; right:-120px; top:-120px;
-      background: radial-gradient(circle at center, #e63946 40%, transparent 41%);
-      filter: blur(28px);
-    }
+    .corner-deco { position:absolute; opacity:.10; pointer-events:none; width:420px; height:420px; right:-120px; top:-120px;
+      background: radial-gradient(circle at center, #e63946 40%, transparent 41%); filter: blur(28px); }
     .title { font-family:'Dancing Script', cursive; font-size:40px; color:var(--rouge); text-align:center; margin:0 0 14px; }
     .names { text-align:center; font-size:22px; margin:2px 0 4px; font-weight:700; }
     .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height:1.2em; }
 
-    #mapframe {
-      position: relative;
-      background: #fff;
-      border-radius: 16px;
-      padding: 10px;
-      box-shadow: 0 8px 22px rgba(0,0,0,.12);
-      margin-top: 16px;
-    }
-    #mapimg {
-      display:block;
-      width:100%;
-      height:auto;
-      border-radius:12px;
-      min-height: 220px;
-    }
-    #markerOverlay {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 34px;
-      height: 34px;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.35));
-      display: none;
-    }
+    #mapframe { position:relative; background:#fff; border-radius:16px; padding:10px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-top:16px; }
+    #mapimg { display:block; width:100%; height:auto; border-radius:12px; min-height:220px; }
+    #markerOverlay { position:absolute; left:50%; top:50%; width:34px; height:34px; transform:translate(-50%,-50%); pointer-events:none; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); display:none; }
 
-    @media (max-width:900px) {
-      #preview { width:100%; }
-    }
-    @media print { body { background:#fff; } }
-
-    /* affiner les tailles sur mobile */
-@media (max-width: 640px) {
-  form { padding:16px; }
-  .row { grid-template-columns:1fr; }
-  .title { font-size:34px; }
-  .names { font-size:20px; }
-  #mapframe { padding:8px; }
-  #markerOverlay { width:30px; height:30px; }
-}
-
-/* améliore le scroll quand le clavier mobile s’ouvre */
-html, body { height:100%; overscroll-behavior: contain; }
-input, select, button { font-size:16px; } /* évite le zoom iOS sur inputs */
-
-    
+    @media (max-width:640px){ form{padding:16px;} .row{grid-template-columns:1fr;} .title{font-size:34px;} .names{font-size:20px;} #mapframe{padding:8px;} #markerOverlay{width:30px;height:30px;} }
+    html, body { height:100%; overscroll-behavior:contain; }
+    input, select, button { font-size:16px; } /* évite zoom iOS */
   </style>
 </head>
 <body>
 <div class="wrap">
-
   <div class="grid">
     <form id="f" autocomplete="on">
       <div class="row">
-        <div><label for="p1">Prénom 1</label><input type="text" id="p1" placeholder="Jacquie" required /></div>
-        <div><label for="p2">Prénom 2</label><input type="text" id="p2" placeholder="Michel" required /></div>
+        <div><label for="p1">Prénom 1</label><input type="text" id="p1" placeholder="Jacquie" required></div>
+        <div><label for="p2">Prénom 2</label><input type="text" id="p2" placeholder="Michel" required></div>
       </div>
 
       <label for="addr">Adresse de rencontre</label>
-      <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required />
+      <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required>
 
-      <div class="checkline">
-        <input type="checkbox" id="showDate" />
-        <label for="showDate" style="margin:0;">afficher la date</label>
-      </div>
+      <div class="checkline"><input type="checkbox" id="showDate"><label for="showDate" style="margin:0;">afficher la date</label></div>
       <div id="dateRow" style="display:none;">
         <label for="date">Date (JJ/MM/AAAA)</label>
-        <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off" />
+        <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off">
       </div>
 
-      <div class="checkline">
-        <input type="checkbox" id="showAddr" checked />
-        <label for="showAddr" style="margin:0;">afficher l’adresse</label>
-      </div>
-      <div class="checkline">
-        <input type="checkbox" id="showCity" checked />
-        <label for="showCity" style="margin:0;">afficher la ville</label>
-      </div>
-      <div class="checkline">
-        <input type="checkbox" id="showCoords" checked />
-        <label for="showCoords" style="margin:0;">afficher les coordonnées</label>
-      </div>
+      <div class="checkline"><input type="checkbox" id="showAddr" checked><label for="showAddr" style="margin:0;">afficher l’adresse</label></div>
+      <div class="checkline"><input type="checkbox" id="showCity" checked><label for="showCity" style="margin:0;">afficher la ville</label></div>
+      <div class="checkline"><input type="checkbox" id="showCoords" checked><label for="showCoords" style="margin:0;">afficher les coordonnées</label></div>
 
       <label for="style">Style du curseur</label>
       <select id="style">
@@ -160,7 +94,6 @@ input, select, button { font-size:16px; } /* évite le zoom iOS sur inputs */
 
       <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
       <button class="secondary" type="button" id="install" style="background:#2d3436">installer l’app</button>
-
     </form>
 
     <section id="preview">
@@ -173,87 +106,45 @@ input, select, button { font-size:16px; } /* évite le zoom iOS sur inputs */
       <p class="meta" id="coord_line"></p>
 
       <div id="mapframe">
-        <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <img id="markerOverlay" alt="" />
+        <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer">
+        <img id="markerOverlay" alt="">
       </div>
     </section>
   </div>
 </div>
 
 <script>
-  // icônes (SVG -> data URL)
+  // icônes (svg -> data url)
   function iconDataUrl(style) {
     const svg = {
-      heart: `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`,
-      pin:   `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`,
-      star:  `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`
+      heart:`<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`,
+      pin:`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`,
+      star:`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`
     }[style] || '';
     return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   }
 
-  const $ = (id) => document.getElementById(id);
-  function toISO(dateStr) {
-    if (!dateStr) return "";
-    if (dateStr.includes('/')) {
-      const [dd, mm, yyyy] = dateStr.split('/').map(s => s.trim());
-      if (!dd || !mm || !yyyy) return "";
-      return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
-    }
-    return dateStr;
-  }
-  function formatDateForPrint(iso) {
-    if (!iso) return "";
-    const [y,m,d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  }
-  function initDatePicker() {
-    if (window.flatpickr) {
-      flatpickr('#date', { dateFormat: 'd/m/Y', allowInput: true, locale: flatpickr.l10ns.fr });
-    }
-  }
+  const $ = (id)=>document.getElementById(id);
+  function toISO(d){ if(!d) return ""; if(d.includes('/')){ const [dd,mm,yyyy]=d.split('/').map(s=>s.trim()); if(!dd||!mm||!yyyy) return ""; return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}` } return d; }
+  function formatDate(iso){ if(!iso) return ""; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+  function initDatePicker(){ if(window.flatpickr){ flatpickr('#date',{ dateFormat:'d/m/Y', allowInput:true, locale:flatpickr.l10ns.fr }); } }
 
-  async function geocodeServer(q) {
-    const r = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
-    if (!r.ok) throw new Error('Geocoding error');
-    return r.json(); // {lat, lon, city}
-  }
+  async function geocodeServer(q){ const r=await fetch(`/api/geocode?q=${encodeURIComponent(q)}`); if(!r.ok) throw new Error('Geocoding error'); return r.json(); }
+  function armImage(dataUrl){ const img=$('mapimg'); $('dl').disabled=true; img.onload=()=>{$('dl').disabled=false}; img.onerror=()=>{$('dl').disabled=false}; img.src=dataUrl; }
+  function setOverlay(style){ const el=$('markerOverlay'); const src=iconDataUrl(style); if(src){ el.src=src; el.style.display='block'; } else { el.style.display='none'; } }
 
-  function armImage(dataUrl) {
-    const img = $('mapimg');
-    $('dl').disabled = true;
-    img.onload = () => { $('dl').disabled = false; };
-    img.onerror = () => { $('dl').disabled = false; };
-    img.src = dataUrl;
-  }
-  function setOverlay(style) {
-    const el = $('markerOverlay');
-    const src = iconDataUrl(style);
-    if (src) { el.src = src; el.style.display = 'block'; }
-    else { el.style.display = 'none'; }
-  }
-
-  async function renderPreview() {
-    try {
-      const p1 = $('p1').value.trim() || $('p1').placeholder;
-      const p2 = $('p2').value.trim() || $('p2').placeholder;
-      const addr = $('addr').value.trim() || $('addr').placeholder;
-      const showDate = $('showDate').checked;
-      const showAddr = $('showAddr').checked;
-      const showCity = $('showCity').checked;
-      const showCoords = $('showCoords').checked;
-      const style = $('style').value;
+  async function renderPreview(){
+    try{
+      const p1=$('p1').value.trim()||$('p1').placeholder;
+      const p2=$('p2').value.trim()||$('p2').placeholder;
+      const addr=$('addr').value.trim()||$('addr').placeholder;
+      const showDate=$('showDate').checked, showAddr=$('showAddr').checked, showCity=$('showCity').checked, showCoords=$('showCoords').checked;
+      const style=$('style').value;
 
       $('names').textContent = `${p1} & ${p2}`;
+      let iso=""; if(showDate){ iso=toISO(($('date').value||'').trim()); $('when').textContent = iso ? `${formatDate(iso)}` : ' '; } else { $('when').textContent=' '; }
 
-      let iso = "";
-      if (showDate) {
-        iso = toISO(($('date').value || '').trim());
-        $('when').textContent = iso ? `${formatDateForPrint(iso)}` : ' ';
-      } else {
-        $('when').textContent = ' ';
-      }
-
-      const { lat, lon, city } = await geocodeServer(addr);
+      const {lat, lon, city} = await geocodeServer(addr);
       const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
       const { dataUrl } = await mapRes.json();
       armImage(dataUrl);
@@ -261,82 +152,59 @@ input, select, button { font-size:16px; } /* évite le zoom iOS sur inputs */
       $('addr_line').textContent  = showAddr   ? `${addr}` : ' ';
       $('city_line').textContent  = showCity   ? `${city || '—'}` : ' ';
       $('coord_line').textContent = showCoords ? `(${lat.toFixed(5)}, ${lon.toFixed(5)})` : ' ';
-
       setOverlay(style);
-    } catch (e) { console.error(e); }
+    }catch(e){ console.error(e); }
   }
 
-  function debounce(fn, ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+  function debounce(fn,ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
   const renderDebounced = debounce(renderPreview, 400);
 
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', async ()=>{
     initDatePicker();
+    $('showDate').addEventListener('change',()=>{ $('dateRow').style.display=$('showDate').checked?'block':'none'; renderDebounced(); });
+    ['p1','p2','addr','date'].forEach(id=>$(id).addEventListener('input',renderDebounced));
+    ['style','showAddr','showCity','showCoords'].forEach(id=>$(id).addEventListener('change',renderDebounced));
 
-    $('showDate').addEventListener('change', () => {
-      $('dateRow').style.display = $('showDate').checked ? 'block' : 'none';
-      renderDebounced();
-    });
-
-    ['p1','p2','addr','date'].forEach(id => $(id).addEventListener('input', renderDebounced));
-    ['style','showAddr','showCity','showCoords'].forEach(id => $(id).addEventListener('change', renderDebounced));
-
-    $('p1').value = 'Jacquie';
-    $('p2').value = 'Michel';
-    $('addr').value = 'Basilique du Sacré-Cœur, Paris';
+    // valeurs par défaut
+    $('p1').value='Jacquie'; $('p2').value='Michel'; $('addr').value='Basilique du Sacré-Cœur, Paris';
     setOverlay($('style').value);
     renderPreview();
   });
 
-  document.getElementById('dl').addEventListener('click', async () => {
-    const el = document.getElementById('preview');
-    const prevWidth = el.style.width;
-    el.style.width = '794px'; // format A4
+  // export PDF A4 (une page) via clone offscreen + scale
+  document.getElementById('dl').addEventListener('click', async ()=>{
+    const A4w=794, A4h=1123;
+    const src=$('preview');
+    const clone=src.cloneNode(true);
+    clone.id='preview-print';
+    Object.assign(clone.style,{position:'fixed',left:'-10000px',top:'0',width:A4w+'px',margin:'0',transformOrigin:'top left',background:getComputedStyle(src).background||'#fff'});
+    document.body.appendChild(clone);
+    await new Promise(r=>requestAnimationFrame(r));
+    const h = clone.scrollHeight;
+    const scale = h>A4h ? (A4h/h) : 1;
+    clone.style.transform = `scale(${scale})`;
+    clone.style.height = (h*scale)+'px';
+
     const opt = {
-      margin: 0,
-      filename: 'la-ou-tout-a-commence.pdf',
-      image: { type: 'jpeg', quality: 1 },
-      html2canvas: { scale: 2.5, useCORS: true, allowTaint: false, windowWidth: 794 },
-      jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: 'avoid-all' }
+      margin:0,
+      filename:'la-ou-tout-a-commence.pdf',
+      image:{type:'jpeg',quality:1},
+      html2canvas:{scale:2.5,useCORS:true,allowTaint:false,windowWidth:A4w,windowHeight:A4h},
+      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['avoid-all']}
     };
-    await html2pdf().from(el).set(opt).save();
-    el.style.width = prevWidth;
+    await html2pdf().from(clone).set(opt).save();
+    document.body.removeChild(clone);
   });
 
-  // enregistre le service worker
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').catch(console.error);
-    });
+  // service worker + install pwa
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(console.error); });
   }
-
-  // bouton installer (PWA add to home)
-  let deferredPrompt = null;
-  const installBtn = document.getElementById('install');
-  if (installBtn) installBtn.style.display = 'none';
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.style.display = 'block';
-  });
-
-  if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-      console.log('PWA install:', outcome);
-    });
-  }
-
-  // iOS: masquer le bouton si déjà en mode standalone
-  if (window.navigator.standalone) {
-    if (installBtn) installBtn.style.display = 'none';
-  }
-
+  let deferredPrompt=null; const installBtn=document.getElementById('install'); if(installBtn) installBtn.style.display='none';
+  window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredPrompt=e; if(installBtn) installBtn.style.display='block'; });
+  if(installBtn){ installBtn.addEventListener('click', async()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; }); }
+  if(window.navigator.standalone){ if(installBtn) installBtn.style.display='none'; }
 </script>
 </body>
 </html>
