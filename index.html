@@ -2,114 +2,135 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Là où tout a commencé…</title>
-
-  <!-- pwa -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="LOTAC">
-  <meta name="application-name" content="LOTAC">
-  <meta name="theme-color" content="#c0392b">
-  <meta name="background-color" content="#fff0f5">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <link rel="manifest" href="/manifest.json">
-
-  <!-- fonts / libs -->
+  <link rel="manifest" href="/public/manifest.json">
+  <title>Là où tout a commencé…</title>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
-
   <style>
-    :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; --card:#ffffff; }
-    * { box-sizing: border-box; }
-    html, body { height:100%; overflow-x:hidden; overscroll-behavior:contain; }
-    img, canvas, svg, video { max-width:100%; height:auto; display:block; }
-    body { margin:0; padding:16px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
-
-    .wrap { max-width:1200px; margin:0 auto; }
-    .grid { display:grid; gap:20px; grid-template-columns:1fr; }
-    .grid > * { min-width:0; } /* évite overflow sur mobile */
-    @media (min-width:1000px){ .grid { gap:24px; grid-template-columns:440px 1fr; } }
-
-    /* --- form layout --- */
-form { background:var(--card); padding:18px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
-label { display:block; font-weight:700; margin:12px 0 6px; }
-input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:16px; }
-input:focus, select:focus { outline:none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
-.row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
-@media (max-width:640px){ .row{ grid-template-columns:1fr; } }
-
-/* grille des cases : 1 colonne mobile, 2 colonnes desktop */
-.checks{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 10px 16px;
-  margin: 10px 0 6px;
-}
-@media (min-width: 768px){
-  .checks{ grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-
-/* chaque ligne = un label clickable avec input + texte */
-.checkline{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  margin:0;
-  font-size:15px;
-  line-height:1.3;
-  cursor:pointer;
-}
-.checkline input{
-  margin:0;
-  transform: scale(1.1);
-  accent-color: var(--rouge);
-}
-.checkline span{
-  font-weight:500;
-  color: var(--texte);
-}
-
-
-/* boutons */
-button { cursor:pointer; font-weight:700; border:none; border-radius:10px; padding:12px 14px; }
-button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:100%; }
-
-    /* aperçu à l’écran : fluide (pas de largeur fixe qui cause un scroll horizontal) */
-    #preview {
-      width:100%;
-      margin:0 auto;
-      background:var(--rose);
-      border-radius:20px;
-      padding:24px;
-      box-shadow:0 10px 30px rgba(0,0,0,.10);
-      position:relative;
-      overflow:hidden;
-      min-height:540px;
+    :root {
+      --rose: #fff0f5;
+      --rouge: #c0392b;
+      --texte: #2c3e50;
+      --gris: #7f8c8d;
+      --card: #fff;
     }
-    .corner-deco { position:absolute; opacity:.10; pointer-events:none; width:360px; height:360px; right:-100px; top:-100px;
-      background: radial-gradient(circle at center, #e63946 40%, transparent 41%); filter: blur(26px); }
-    .title { font-family:'Dancing Script', cursive; font-size:36px; color:var(--rouge); text-align:center; margin:0 0 12px; }
-    .names { text-align:center; font-size:22px; margin:2px 0 4px; font-weight:700; }
-    .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height:1.2em; overflow-wrap:anywhere; }
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #fafafa;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color: var(--texte);
+    }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 360px 1fr; } }
 
-    #mapframe { position:relative; background:#fff; border-radius:16px; padding:10px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-top:16px; }
-    #mapimg { width:100%; height:auto; border-radius:12px; min-height:220px; }
-    #markerOverlay { position:absolute; left:50%; top:50%; width:clamp(26px,6vw,34px); height:clamp(26px,6vw,34px); transform:translate(-50%,-50%); pointer-events:none; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); display:none; }
+    /* ---- FORM ---- */
+    form {
+      background: var(--card);
+      padding: 18px;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    }
+    label { display:block; font-weight:700; margin:12px 0 6px; }
+    input, select, button {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #c0392b55;
+      box-shadow: 0 0 0 3px #c0392b20;
+    }
+    .row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
 
-    @media (max-width:640px){
-      body { padding:12px; }
-      form { padding:16px; }
-      .row { grid-template-columns:1fr; }
-      .title { font-size:32px; }
-      .names { font-size:20px; }
-      #mapframe { padding:8px; }
+    /* --- checkboxes alignées --- */
+    .checks {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px 16px;
+      margin: 10px 0 6px;
+    }
+    @media (min-width: 768px) {
+      .checks { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    .checkline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+      cursor: pointer;
+    }
+    .checkline input {
+      margin: 0;
+      transform: scale(1.1);
+      accent-color: var(--rouge);
+    }
+    .checkline span {
+      font-weight: 500;
+      color: var(--texte);
+    }
+
+    /* bouton principal */
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    button.secondary {
+      background: var(--rouge);
+      color: #fff;
+      margin-top: 14px;
+      width: 100%;
+    }
+
+    /* ---- PREVIEW ---- */
+    #preview {
+      background: var(--rose);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 38px;
+      color: var(--rouge);
+      text-align: center;
+      margin: 0 0 10px;
+    }
+    .names { text-align: center; font-size: 22px; margin: 0 0 6px; font-weight:600; }
+    .meta { text-align: center; color: var(--gris); margin: 2px 0; }
+    #mapimg {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,.15);
+      margin-top: 14px;
+    }
+    .heart { width: 26px; height: 26px; display: inline-block; margin-top: 10px; }
+    @media print { body { background: #fff; } }
+
+    .corner-deco {
+      position: absolute;
+      opacity: .08;
+      pointer-events: none;
+      width: 280px; height: 280px;
+      right: -60px; top: -60px;
+      background: radial-gradient(circle at center, #e63946 40%, transparent 41%);
+      filter: blur(22px);
     }
   </style>
 </head>
@@ -117,171 +138,135 @@ button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:1
 <div class="wrap">
   <div class="grid">
     <form id="f" autocomplete="on">
-  <div class="row">
-    <div>
-      <label for="p1">Prénom 1</label>
-      <input type="text" id="p1" placeholder="Jacquie" required>
-    </div>
-    <div>
-      <label for="p2">Prénom 2</label>
-      <input type="text" id="p2" placeholder="Michel" required>
-    </div>
-  </div>
+      <div class="row">
+        <div>
+          <label for="p1">Prénom 1</label>
+          <input type="text" id="p1" placeholder="Jacquie" required>
+        </div>
+        <div>
+          <label for="p2">Prénom 2</label>
+          <input type="text" id="p2" placeholder="Michel" required>
+        </div>
+      </div>
 
-  <label for="addr">Adresse de rencontre</label>
-  <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required>
+      <label for="addr">Adresse de rencontre</label>
+      <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required>
 
- <!-- options d’affichage -->
-<div class="checks" role="group" aria-label="Options d’affichage">
-  <label class="checkline">
-    <input type="checkbox" id="showDate">
-    <span>afficher la date</span>
-  </label>
+      <div class="checks" role="group" aria-label="Options d’affichage">
+        <label class="checkline">
+          <input type="checkbox" id="showDate">
+          <span>afficher la date</span>
+        </label>
+        <label class="checkline">
+          <input type="checkbox" id="showAddr" checked>
+          <span>afficher l’adresse</span>
+        </label>
+        <label class="checkline">
+          <input type="checkbox" id="showCity" checked>
+          <span>afficher la ville</span>
+        </label>
+        <label class="checkline">
+          <input type="checkbox" id="showCoords" checked>
+          <span>afficher les coordonnées</span>
+        </label>
+      </div>
 
-  <label class="checkline">
-    <input type="checkbox" id="showAddr" checked>
-    <span>afficher l’adresse</span>
-  </label>
+      <div id="dateRow" style="display:none;">
+        <label for="date">Date (JJ/MM/AAAA)</label>
+        <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off">
+      </div>
 
-  <label class="checkline">
-    <input type="checkbox" id="showCity" checked>
-    <span>afficher la ville</span>
-  </label>
+      <label for="style">Style du curseur</label>
+      <select id="style">
+        <option value="heart" selected>cœur</option>
+        <option value="pin">curseur</option>
+        <option value="star">étoile</option>
+      </select>
 
-  <label class="checkline">
-    <input type="checkbox" id="showCoords" checked>
-    <span>afficher les coordonnées</span>
-  </label>
-</div>
-
-  <!-- champ date (affiché uniquement si “afficher la date” est coché) -->
-  <div id="dateRow" style="display:none;">
-    <label for="date">Date (JJ/MM/AAAA)</label>
-    <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off">
-  </div>
-
-  <label for="style">Style du curseur</label>
-  <select id="style">
-    <option value="heart" selected>cœur</option>
-    <option value="pin">curseur</option>
-    <option value="star">étoile</option>
-  </select>
-
-  <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
-  <button class="secondary" type="button" id="install" style="background:#2d3436">installer l’app</button>
-</form>
+      <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
+    </form>
 
     <section id="preview">
       <div class="corner-deco"></div>
       <h2 class="title">Là où tout a commencé…</h2>
-      <p class="names" id="names">—</p>
-      <p class="meta" id="when"></p>
-      <p class="meta" id="addr_line"></p>
-      <p class="meta" id="city_line"></p>
-      <p class="meta" id="coord_line"></p>
-
-      <div id="mapframe">
-        <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer">
-        <img id="markerOverlay" alt="">
-      </div>
+      <p class="names" id="names">Jacquie & Michel</p>
+      <p class="meta" id="when">—</p>
+      <p class="meta" id="where">—</p>
+      <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
+      <div><span class="heart" id="heart"></span></div>
     </section>
   </div>
 </div>
 
 <script>
-  // icônes (svg -> data url)
-  function iconDataUrl(style) {
-    const svg = {
-      heart:`<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`,
-      pin:`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`,
-      star:`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`
-    }[style] || '';
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+const ICONS = {
+  heart: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`),
+  pin: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`),
+  star: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`)
+};
+
+const $ = (id) => document.getElementById(id);
+
+// affichage conditionnel de la date
+$('showDate').addEventListener('change', e => {
+  $('dateRow').style.display = e.target.checked ? 'block' : 'none';
+});
+
+async function updatePreview() {
+  const p1 = $('p1').value.trim() || 'Jacquie';
+  const p2 = $('p2').value.trim() || 'Michel';
+  const addr = $('addr').value.trim() || 'Basilique du Sacré-Cœur, Paris';
+  const date = $('date').value.trim();
+  const style = $('style').value;
+
+  $('names').textContent = `${p1} & ${p2}`;
+
+  let details = [];
+  if ($('showAddr').checked) details.push(addr);
+  if ($('showCity').checked) details.push('France métropolitaine');
+
+  // coords par défaut = Sacré-Cœur
+  let lat = 48.88681, lon = 2.34302, city = 'Paris';
+  try {
+    const r = await fetch(`/api/geocode?q=${encodeURIComponent(addr)}`);
+    if (r.ok) {
+      const d = await r.json();
+      lat = d.lat; lon = d.lon; city = d.city;
+    }
+  } catch(e){ console.log(e); }
+
+  if ($('showCoords').checked) details.push(`(${lat.toFixed(5)}, ${lon.toFixed(5)})`);
+  $('where').textContent = details.join(' • ');
+  $('when').textContent = $('showDate').checked && date ? date : '';
+
+  try {
+    const r = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
+    const { dataUrl } = await r.json();
+    $('mapimg').src = dataUrl;
+  } catch {
+    $('mapimg').src = '';
   }
 
-  const $ = (id)=>document.getElementById(id);
-  function toISO(d){ if(!d) return ""; if(d.includes('/')){ const [dd,mm,yyyy]=d.split('/').map(s=>s.trim()); if(!dd||!mm||!yyyy) return ""; return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}` } return d; }
-  function formatDate(iso){ if(!iso) return ""; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
-  function initDatePicker(){ if(window.flatpickr){ flatpickr('#date',{ dateFormat:'d/m/Y', allowInput:true, locale:flatpickr.l10ns.fr }); } }
+  $('heart').style.background = `url(${ICONS[style]}) no-repeat center/contain`;
+  $('dl').disabled = false;
+}
 
-  async function geocodeServer(q){ const r=await fetch(`/api/geocode?q=${encodeURIComponent(q)}`); if(!r.ok) throw new Error('Geocoding error'); return r.json(); }
-  function armImage(dataUrl){ const img=$('mapimg'); $('dl').disabled=true; img.onload=()=>{$('dl').disabled=false}; img.onerror=()=>{$('dl').disabled=false}; img.src=dataUrl; }
-  function setOverlay(style){ const el=$('markerOverlay'); const src=iconDataUrl(style); if(src){ el.src=src; el.style.display='block'; } else { el.style.display='none'; } }
+['p1','p2','addr','date','style','showAddr','showCity','showCoords','showDate']
+.forEach(id => $(id).addEventListener('input', updatePreview));
 
-  async function renderPreview(){
-    try{
-      const p1=$('p1').value.trim()||$('p1').placeholder;
-      const p2=$('p2').value.trim()||$('p2').placeholder;
-      const addr=$('addr').value.trim()||$('addr').placeholder;
-      const showDate=$('showDate').checked, showAddr=$('showAddr').checked, showCity=$('showCity').checked, showCoords=$('showCoords').checked;
-      const style=$('style').value;
+updatePreview();
 
-      $('names').textContent = `${p1} & ${p2}`;
-      let iso=""; if(showDate){ iso=toISO(($('date').value||'').trim()); $('when').textContent = iso ? `${formatDate(iso)}` : ' '; } else { $('when').textContent=' '; }
-
-      const {lat, lon, city} = await geocodeServer(addr);
-      const mapRes = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
-      const { dataUrl } = await mapRes.json();
-      armImage(dataUrl);
-
-      $('addr_line').textContent  = showAddr   ? `${addr}` : ' ';
-      $('city_line').textContent  = showCity   ? `${city || '—'}` : ' ';
-      $('coord_line').textContent = showCoords ? `(${lat.toFixed(5)}, ${lon.toFixed(5)})` : ' ';
-      setOverlay(style);
-    }catch(e){ console.error(e); }
-  }
-
-  function debounce(fn,ms=400){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
-  const renderDebounced = debounce(renderPreview, 400);
-
-  document.addEventListener('DOMContentLoaded', async ()=>{
-    initDatePicker();
-    $('showDate').addEventListener('change',()=>{ $('dateRow').style.display=$('showDate').checked?'block':'none'; renderDebounced(); });
-    ['p1','p2','addr','date'].forEach(id=>$(id).addEventListener('input',renderDebounced));
-    ['style','showAddr','showCity','showCoords'].forEach(id=>$(id).addEventListener('change',renderDebounced));
-    $('p1').value='Jacquie'; $('p2').value='Michel'; $('addr').value='Basilique du Sacré-Cœur, Paris';
-    setOverlay($('style').value);
-    renderPreview();
-  });
-
-  // PDF A4 (1 page) sans déformer l'écran : clone fixe invisible (pas de scroll horizontal)
-  document.getElementById('dl').addEventListener('click', async ()=>{
-    const A4w=794, A4h=1123;
-    const src=$('preview');
-    const clone=src.cloneNode(true);
-    clone.id='preview-print';
-    Object.assign(clone.style,{
-      position:'fixed', left:'0', top:'0', width:A4w+'px',
-      margin:'0', transformOrigin:'top left',
-      background:getComputedStyle(src).background||'#fff',
-      opacity:'0', pointerEvents:'none', zIndex:'-1'
-    });
-    document.body.appendChild(clone);
-    await new Promise(r=>requestAnimationFrame(r));
-    const h = clone.scrollHeight;
-    const scale = h>A4h ? (A4h/h) : 1;
-    clone.style.transform = `scale(${scale})`;
-    clone.style.height = (h*scale)+'px';
-
-    const opt = {
-      margin:0, filename:'la-ou-tout-a-commence.pdf',
-      image:{type:'jpeg',quality:1},
-      html2canvas:{scale:2.5,useCORS:true,allowTaint:false,windowWidth:A4w,windowHeight:A4h},
-      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['avoid-all']}
-    };
-    await html2pdf().from(clone).set(opt).save();
-    document.body.removeChild(clone);
-  });
-
-  // service worker + install pwa
-  if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(console.error); });
-  }
-  let deferredPrompt=null; const installBtn=document.getElementById('install'); if(installBtn) installBtn.style.display='none';
-  window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredPrompt=e; if(installBtn) installBtn.style.display='block'; });
-  if(installBtn){ installBtn.addEventListener('click', async()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; }); }
-  if(window.navigator.standalone){ if(installBtn) installBtn.style.display='none'; }
+$('dl').addEventListener('click', () => {
+  const el = $('preview');
+  const opt = {
+    margin: [10,10,10,10],
+    filename: 'la-ou-tout-a-commence.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().from(el).set(opt).save();
+});
 </script>
 </body>
 </html>
