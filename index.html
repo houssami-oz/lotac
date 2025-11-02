@@ -18,7 +18,7 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
 
-  <!-- fontes / libs -->
+  <!-- fonts / libs -->
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -26,41 +26,56 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
 
   <style>
-    :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; --card:#ffffff; --A4w:794px; --A4h:1123px; }
+    :root { --rose:#fff0f5; --rouge:#c0392b; --texte:#2c3e50; --gris:#7f8c8d; --card:#ffffff; }
     * { box-sizing: border-box; }
-    body { margin:0; padding:20px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
+    html, body { height:100%; overflow-x:hidden; overscroll-behavior:contain; }
+    img, canvas, svg, video { max-width:100%; height:auto; display:block; }
+    body { margin:0; padding:16px; background:#fafafa; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; color:var(--texte); }
+
     .wrap { max-width:1200px; margin:0 auto; }
+    .grid { display:grid; gap:20px; grid-template-columns:1fr; }
+    .grid > * { min-width:0; } /* évite overflow sur mobile */
+    @media (min-width:1000px){ .grid { gap:24px; grid-template-columns:440px 1fr; } }
 
-    .grid { display:grid; gap:24px; grid-template-columns:1fr; }
-    @media (min-width:1000px){ .grid { grid-template-columns:440px 1fr; } }
-
-    form { background:var(--card); padding:22px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
+    form { background:var(--card); padding:18px; border-radius:16px; box-shadow:0 6px 18px rgba(0,0,0,.08); }
     label { display:block; font-weight:700; margin:12px 0 6px; }
-    input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:15px; }
+    input, select, button { width:100%; padding:12px 14px; border:1px solid #e5e7eb; border-radius:10px; font-size:16px; }
     input:focus, select:focus { outline:none; border-color:#c0392b55; box-shadow:0 0 0 3px #c0392b20; }
     .row { display:grid; gap:10px; grid-template-columns:1fr 1fr; }
     .checkline { display:flex; align-items:center; gap:10px; margin:8px 0; }
     button { cursor:pointer; font-weight:700; border:none; border-radius:10px; padding:12px 14px; }
     button.secondary { background:var(--rouge); color:#fff; margin-top:14px; width:100%; }
 
+    /* aperçu à l’écran : fluide (pas de largeur fixe qui cause un scroll horizontal) */
     #preview {
-      width:var(--A4w); max-width:100%; margin:0 auto;
-      background:var(--rose); border-radius:20px; padding:30px 28px 42px;
-      box-shadow:0 10px 30px rgba(0,0,0,.10); position:relative; overflow:hidden; min-height:540px;
+      width:100%;
+      margin:0 auto;
+      background:var(--rose);
+      border-radius:20px;
+      padding:24px;
+      box-shadow:0 10px 30px rgba(0,0,0,.10);
+      position:relative;
+      overflow:hidden;
+      min-height:540px;
     }
-    .corner-deco { position:absolute; opacity:.10; pointer-events:none; width:420px; height:420px; right:-120px; top:-120px;
-      background: radial-gradient(circle at center, #e63946 40%, transparent 41%); filter: blur(28px); }
-    .title { font-family:'Dancing Script', cursive; font-size:40px; color:var(--rouge); text-align:center; margin:0 0 14px; }
+    .corner-deco { position:absolute; opacity:.10; pointer-events:none; width:360px; height:360px; right:-100px; top:-100px;
+      background: radial-gradient(circle at center, #e63946 40%, transparent 41%); filter: blur(26px); }
+    .title { font-family:'Dancing Script', cursive; font-size:36px; color:var(--rouge); text-align:center; margin:0 0 12px; }
     .names { text-align:center; font-size:22px; margin:2px 0 4px; font-weight:700; }
-    .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height:1.2em; }
+    .meta  { text-align:center; color:var(--gris); margin:2px 0; min-height:1.2em; overflow-wrap:anywhere; }
 
     #mapframe { position:relative; background:#fff; border-radius:16px; padding:10px; box-shadow:0 8px 22px rgba(0,0,0,.12); margin-top:16px; }
-    #mapimg { display:block; width:100%; height:auto; border-radius:12px; min-height:220px; }
-    #markerOverlay { position:absolute; left:50%; top:50%; width:34px; height:34px; transform:translate(-50%,-50%); pointer-events:none; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); display:none; }
+    #mapimg { width:100%; height:auto; border-radius:12px; min-height:220px; }
+    #markerOverlay { position:absolute; left:50%; top:50%; width:clamp(26px,6vw,34px); height:clamp(26px,6vw,34px); transform:translate(-50%,-50%); pointer-events:none; filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35)); display:none; }
 
-    @media (max-width:640px){ form{padding:16px;} .row{grid-template-columns:1fr;} .title{font-size:34px;} .names{font-size:20px;} #mapframe{padding:8px;} #markerOverlay{width:30px;height:30px;} }
-    html, body { height:100%; overscroll-behavior:contain; }
-    input, select, button { font-size:16px; } /* évite zoom iOS */
+    @media (max-width:640px){
+      body { padding:12px; }
+      form { padding:16px; }
+      .row { grid-template-columns:1fr; }
+      .title { font-size:32px; }
+      .names { font-size:20px; }
+      #mapframe { padding:8px; }
+    }
   </style>
 </head>
 <body>
@@ -164,20 +179,23 @@
     $('showDate').addEventListener('change',()=>{ $('dateRow').style.display=$('showDate').checked?'block':'none'; renderDebounced(); });
     ['p1','p2','addr','date'].forEach(id=>$(id).addEventListener('input',renderDebounced));
     ['style','showAddr','showCity','showCoords'].forEach(id=>$(id).addEventListener('change',renderDebounced));
-
-    // valeurs par défaut
     $('p1').value='Jacquie'; $('p2').value='Michel'; $('addr').value='Basilique du Sacré-Cœur, Paris';
     setOverlay($('style').value);
     renderPreview();
   });
 
-  // export PDF A4 (une page) via clone offscreen + scale
+  // PDF A4 (1 page) sans déformer l'écran : clone fixe invisible (pas de scroll horizontal)
   document.getElementById('dl').addEventListener('click', async ()=>{
     const A4w=794, A4h=1123;
     const src=$('preview');
     const clone=src.cloneNode(true);
     clone.id='preview-print';
-    Object.assign(clone.style,{position:'fixed',left:'-10000px',top:'0',width:A4w+'px',margin:'0',transformOrigin:'top left',background:getComputedStyle(src).background||'#fff'});
+    Object.assign(clone.style,{
+      position:'fixed', left:'0', top:'0', width:A4w+'px',
+      margin:'0', transformOrigin:'top left',
+      background:getComputedStyle(src).background||'#fff',
+      opacity:'0', pointerEvents:'none', zIndex:'-1'
+    });
     document.body.appendChild(clone);
     await new Promise(r=>requestAnimationFrame(r));
     const h = clone.scrollHeight;
@@ -186,8 +204,7 @@
     clone.style.height = (h*scale)+'px';
 
     const opt = {
-      margin:0,
-      filename:'la-ou-tout-a-commence.pdf',
+      margin:0, filename:'la-ou-tout-a-commence.pdf',
       image:{type:'jpeg',quality:1},
       html2canvas:{scale:2.5,useCORS:true,allowTaint:false,windowWidth:A4w,windowHeight:A4h},
       jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
