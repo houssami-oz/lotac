@@ -3,135 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="mobile-web-app-capable" content="yes">
-  <link rel="manifest" href="/manifest.json">
   <title>Là où tout a commencé…</title>
+
+  <!-- PWA essentials -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#c0392b">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon-192.png">
+
+  <!-- Fonts & libs -->
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
   <style>
-    :root {
-      --rose: #fff0f5;
-      --rouge: #c0392b;
-      --texte: #2c3e50;
-      --gris: #7f8c8d;
-      --card: #fff;
-    }
-    body {
-      margin: 0;
-      padding: 20px;
-      background: #fafafa;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color: var(--texte);
-    }
-    .wrap { max-width: 980px; margin: 0 auto; }
-    .grid { display: grid; gap: 20px; grid-template-columns: 1fr; }
-    @media (min-width: 900px) { .grid { grid-template-columns: 360px 1fr; } }
+    :root{--rose:#fff0f5;--rouge:#c0392b;--texte:#2c3e50;--gris:#7f8c8d;--card:#fff;--A4w:794px;--A4h:1123px}
+    *{box-sizing:border-box}
+    html,body{height:100%;overflow-x:hidden}
+    body{margin:0;padding:16px;background:#fafafa;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--texte)}
+    img{max-width:100%;display:block}
 
-    /* ---- FORM ---- */
-    form {
-      background: var(--card);
-      padding: 18px;
-      border-radius: 16px;
-      box-shadow: 0 6px 18px rgba(0,0,0,.08);
-    }
-    label { display:block; font-weight:700; margin:12px 0 6px; }
-    input, select, button {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #c0392b55;
-      box-shadow: 0 0 0 3px #c0392b20;
-    }
-    .row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
-    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+    .wrap{max-width:1200px;margin:0 auto}
+    .grid{display:grid;gap:20px;grid-template-columns:1fr}
+    .grid>*{min-width:0}
+    @media(min-width:1000px){.grid{grid-template-columns:440px 1fr;gap:24px}}
 
-    /* --- checkboxes alignées --- */
-    .checks {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px 16px;
-      margin: 10px 0 6px;
-    }
-    @media (min-width: 768px) {
-      .checks { grid-template-columns: repeat(2, minmax(0,1fr)); }
-    }
-    .checkline {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.3;
-      cursor: pointer;
-    }
-    .checkline input {
-      margin: 0;
-      transform: scale(1.1);
-      accent-color: var(--rouge);
-    }
-    .checkline span {
-      font-weight: 500;
-      color: var(--texte);
-    }
+    /* form */
+    form{background:var(--card);padding:18px;border-radius:16px;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+    label{display:block;font-weight:700;margin:12px 0 6px}
+    input,select,button{width:100%;padding:12px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px}
+    input:focus,select:focus{outline:none;border-color:#c0392b55;box-shadow:0 0 0 3px #c0392b20}
 
-    /* bouton principal */
-    button {
-      cursor: pointer;
-      font-weight: 700;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 14px;
-    }
-    button.secondary {
-      background: var(--rouge);
-      color: #fff;
-      margin-top: 14px;
-      width: 100%;
-    }
+    .row{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+    @media(max-width:640px){.row{grid-template-columns:1fr}}
 
-    /* ---- PREVIEW ---- */
-    #preview {
-      background: var(--rose);
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 6px 16px rgba(0,0,0,.08);
-      position: relative;
-      overflow: hidden;
-    }
-    .title {
-      font-family: 'Dancing Script', cursive;
-      font-size: 38px;
-      color: var(--rouge);
-      text-align: center;
-      margin: 0 0 10px;
-    }
-    .names { text-align: center; font-size: 22px; margin: 0 0 6px; font-weight:600; }
-    .meta { text-align: center; color: var(--gris); margin: 2px 0; }
-    #mapimg {
-      width: 100%;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 6px 12px rgba(0,0,0,.15);
-      margin-top: 14px;
-    }
-    .heart { width: 26px; height: 26px; display: inline-block; margin-top: 10px; }
-    @media print { body { background: #fff; } }
+    /* options (accordéon) */
+    .accordion-btn{margin-top:8px;background:#f3f4f6;border:1px solid #e5e7eb;color:#111;display:flex;align-items:center;justify-content:space-between}
+    .accordion{display:none;margin-top:10px;padding:12px;border:1px solid #eee;border-radius:12px;background:#fafafa}
+    .checks{display:grid;grid-template-columns:1fr;gap:10px 16px}
+    @media(min-width:768px){.checks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .checkline{display:flex;align-items:center;gap:10px;margin:0;font-size:15px;cursor:pointer}
+    .checkline input{transform:scale(1.1);accent-color:var(--rouge)}
 
-    .corner-deco {
-      position: absolute;
-      opacity: .08;
-      pointer-events: none;
-      width: 280px; height: 280px;
-      right: -60px; top: -60px;
-      background: radial-gradient(circle at center, #e63946 40%, transparent 41%);
-      filter: blur(22px);
-    }
+    /* preview */
+    #preview{width:100%;background:var(--rose);border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.10);position:relative;overflow:hidden}
+    .corner-deco{position:absolute;opacity:.10;pointer-events:none;width:360px;height:360px;right:-100px;top:-100px;background:radial-gradient(circle,#e63946 40%,transparent 41%);filter:blur(26px)}
+    .title{font-family:'Dancing Script',cursive;font-size:36px;color:var(--rouge);text-align:center;margin:0 0 12px}
+    .names{text-align:center;font-size:22px;margin:2px 0 4px;font-weight:700}
+    .meta{text-align:center;color:var(--gris);margin:2px 0;min-height:1.2em;overflow-wrap:anywhere}
+
+    #mapframe{position:relative;background:#fff;border-radius:16px;padding:10px;box-shadow:0 8px 22px rgba(0,0,0,.12);margin-top:16px}
+    #mapimg{width:100%;height:auto;border-radius:12px;min-height:240px;aspect-ratio:11/6}
+    #marker{position:absolute;left:50%;top:50%;width:clamp(26px,6vw,34px);height:clamp(26px,6vw,34px);transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35));display:block}
+
+    .map-controls{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+    .map-controls button{width:auto;padding:8px 10px;border-radius:10px;background:#f3f4f6;border:1px solid #e5e7eb}
+    .map-controls .arrows{display:grid;grid-template-columns:36px 36px 36px;gap:4px}
+    .map-controls .arrows button{height:36px}
+
+    button.primary{background:var(--rouge);color:#fff;border:none;margin-top:14px}
   </style>
 </head>
 <body>
@@ -141,132 +71,297 @@
       <div class="row">
         <div>
           <label for="p1">Prénom 1</label>
-          <input type="text" id="p1" placeholder="Jacquie" required>
+          <input id="p1" placeholder="Jacquie" />
         </div>
         <div>
           <label for="p2">Prénom 2</label>
-          <input type="text" id="p2" placeholder="Michel" required>
+          <input id="p2" placeholder="Michel" />
         </div>
       </div>
 
-      <label for="addr">Adresse de rencontre</label>
-      <input type="text" id="addr" placeholder="Basilique du Sacré-Cœur, Paris" required>
+      <label>Adresse (rue et n°)</label>
+      <input id="street" placeholder="35 Rue du Chevalier de la Barre" autocomplete="address-line1" />
 
-      <div class="checks" role="group" aria-label="Options d’affichage">
-        <label class="checkline">
-          <input type="checkbox" id="showDate">
-          <span>afficher la date</span>
-        </label>
-        <label class="checkline">
-          <input type="checkbox" id="showAddr" checked>
-          <span>afficher l’adresse</span>
-        </label>
-        <label class="checkline">
-          <input type="checkbox" id="showCity" checked>
-          <span>afficher la ville</span>
-        </label>
-        <label class="checkline">
-          <input type="checkbox" id="showCoords" checked>
-          <span>afficher les coordonnées</span>
-        </label>
+      <div class="row">
+        <div>
+          <label>Code postal</label>
+          <input id="postal" placeholder="75018" inputmode="numeric" autocomplete="postal-code" />
+        </div>
+        <div>
+          <label>Ville</label>
+          <input id="city" placeholder="Paris" autocomplete="address-level2" />
+        </div>
       </div>
 
-      <div id="dateRow" style="display:none;">
-        <label for="date">Date (JJ/MM/AAAA)</label>
-        <input type="text" id="date" placeholder="jj/mm/aaaa" inputmode="numeric" autocomplete="off">
-      </div>
-
-      <label for="style">Style du curseur</label>
-      <select id="style">
-        <option value="heart" selected>cœur</option>
-        <option value="pin">curseur</option>
-        <option value="star">étoile</option>
+      <label>Pays</label>
+      <select id="country" autocomplete="country">
+        <optgroup label="Populaires">
+          <option selected>France</option>
+          <option>Belgique</option>
+          <option>Suisse</option>
+          <option>Luxembourg</option>
+          <option>Espagne</option>
+          <option>Italie</option>
+          <option>Allemagne</option>
+        </optgroup>
+        <optgroup label="Autres">
+          <option>Portugal</option><option>Pays-Bas</option><option>Royaume-Uni</option>
+          <option>États-Unis</option><option>Canada</option>
+        </optgroup>
       </select>
 
-      <button class="secondary" type="button" id="dl" disabled>télécharger le PDF</button>
+      <button class="accordion-btn" type="button" id="optBtn">
+        options d’affichage <span id="optCaret">▾</span>
+      </button>
+      <div class="accordion" id="optPanel">
+        <div class="checks">
+          <label class="checkline"><input type="checkbox" id="showDate"><span>afficher la date</span></label>
+          <div id="dateRow" style="display:none">
+            <label for="date" style="margin:6px 0 6px">Date (JJ/MM/AAAA)</label>
+            <input id="date" placeholder="jj/mm/aaaa" inputmode="numeric" />
+          </div>
+
+          <label class="checkline"><input type="checkbox" id="showStreet" checked><span>afficher l’adresse</span></label>
+          <label class="checkline"><input type="checkbox" id="showPostal" checked><span>afficher le code postal</span></label>
+          <label class="checkline"><input type="checkbox" id="showCity" checked><span>afficher la ville</span></label>
+          <label class="checkline"><input type="checkbox" id="showCoords" checked><span>afficher les coordonnées</span></label>
+
+          <label style="margin-top:8px">Style du curseur</label>
+          <select id="style">
+            <option value="heart" selected>cœur</option>
+            <option value="pin">curseur</option>
+            <option value="star">étoile</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="primary" type="button" id="dl" disabled>télécharger le PDF</button>
     </form>
 
     <section id="preview">
       <div class="corner-deco"></div>
       <h2 class="title">Là où tout a commencé…</h2>
       <p class="names" id="names">Jacquie & Michel</p>
-      <p class="meta" id="when">—</p>
-      <p class="meta" id="where">—</p>
-      <img id="mapimg" alt="Plan de la rencontre" crossorigin="anonymous" referrerpolicy="no-referrer" />
-      <div><span class="heart" id="heart"></span></div>
+      <p class="meta" id="when"></p>
+      <p class="meta" id="line1"></p>
+      <p class="meta" id="line2"></p>
+      <p class="meta" id="line3"></p>
+
+      <div id="mapframe">
+        <img id="mapimg" alt="Plan de la rencontre">
+        <img id="marker" alt="">
+      </div>
+
+      <div class="map-controls">
+        <div class="arrows">
+          <button type="button" data-pan="up">↑</button>
+          <button type="button" data-zoom="+">＋</button>
+          <button type="button" data-pan="right">→</button>
+          <button type="button" data-pan="left">←</button>
+          <button type="button" data-zoom="-">－</button>
+          <button type="button" data-pan="down">↓</button>
+        </div>
+      </div>
     </section>
   </div>
 </div>
 
 <script>
+/* ---------- icons (SVG → data URLs) ---------- */
 const ICONS = {
-  heart: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="#e63946" stroke="white" stroke-width="1.2"><path d="M12 21s-6.716-4.486-9.193-8.022C.42 9.495 2.027 6 5.343 6c1.862 0 3.04 1.133 3.93 2.29C10.617 7.133 11.795 6 13.657 6c3.316 0 4.924 3.495 2.536 6.978C18.716 16.514 12 21 12 21z"/></svg>`),
-  pin: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.2"><path d="M12 2C8.686 2 6 4.686 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.314-2.686-6-6-6zm0 8.5A2.5 2.5 0 1 1 12 5a2.5 2.5 0 0 1 0 5z"/></svg>`),
-  star: 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.2"><path d="M12 17.27l6.18 3.73-1.64-7.03L21 9.24l-7.19-.61L12 2 10.19 8.63 3 9.24l4.46 4.73L5.82 21z"/></svg>`)
+  heart: 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#e63946">
+       <path d="M12 21c-4.8-3.6-8-6.9-8-10.7C4 7.3 6.2 5 9 5c1.4 0 2.7.7 3.5 1.9C13.3 5.7 14.6 5 16 5c2.8 0 5 2.3 5 5.3 0 3.8-3.2 7.1-9 10.7z"/>
+     </svg>`),
+  pin: 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#c0392b" stroke="white" stroke-width="1.1">
+       <path d="M12 2c-3.3 0-6 2.7-6 6 0 4.6 6 12 6 12s6-7.4 6-12c0-3.3-2.7-6-6-6zm0 9.2a3.2 3.2 0 1 1 0-6.4 3.2 3.2 0 0 1 0 6.4z"/>
+     </svg>`),
+  star: 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#f1c40f" stroke="white" stroke-width="1.1">
+       <path d="M12 17.3l6.2 3.7-1.6-7 4.4-4.8-7.2-.6L12 2 10.2 8.6 3 9.2l4.4 4.8L5.8 21z"/>
+     </svg>`)
 };
 
-const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-// affichage conditionnel de la date
-$('showDate').addEventListener('change', e => {
-  $('dateRow').style.display = e.target.checked ? 'block' : 'none';
+/* ---------- accordéon ---------- */
+const btn = $('optBtn'), panel = $('optPanel'), caret = $('optCaret');
+btn.addEventListener('click', () => {
+  const open = panel.style.display === 'block';
+  panel.style.display = open ? 'none' : 'block';
+  caret.textContent = open ? '▾' : '▴';
 });
 
-async function updatePreview() {
-  const p1 = $('p1').value.trim() || 'Jacquie';
-  const p2 = $('p2').value.trim() || 'Michel';
-  const addr = $('addr').value.trim() || 'Basilique du Sacré-Cœur, Paris';
-  const date = $('date').value.trim();
-  const style = $('style').value;
-
-  $('names').textContent = `${p1} & ${p2}`;
-
-  let details = [];
-  if ($('showAddr').checked) details.push(addr);
-  if ($('showCity').checked) details.push('France métropolitaine');
-
-  // coords par défaut = Sacré-Cœur
-  let lat = 48.88681, lon = 2.34302, city = 'Paris';
-  try {
-    const r = await fetch(`/api/geocode?q=${encodeURIComponent(addr)}`);
-    if (r.ok) {
-      const d = await r.json();
-      lat = d.lat; lon = d.lon; city = d.city;
-    }
-  } catch(e){ console.log(e); }
-
-  if ($('showCoords').checked) details.push(`(${lat.toFixed(5)}, ${lon.toFixed(5)})`);
-  $('where').textContent = details.join(' • ');
-  $('when').textContent = $('showDate').checked && date ? date : '';
-
-  try {
-    const r = await fetch(`/api/staticmap?lat=${lat}&lon=${lon}&zoom=15&w=1100&h=650`);
-    const { dataUrl } = await r.json();
-    $('mapimg').src = dataUrl;
-  } catch {
-    $('mapimg').src = '';
+/* ---------- date ---------- */
+const showDate = $('showDate');
+const dateRow = $('dateRow');
+showDate.addEventListener('change', () => {
+  dateRow.style.display = showDate.checked ? 'block' : 'none';
+  if (showDate.checked && !$('date').value) {
+    const d = new Date(), dd = String(d.getDate()).padStart(2,'0'),
+          mm = String(d.getMonth()+1).padStart(2,'0'), yy = d.getFullYear();
+    $('date').value = `${dd}/${mm}/${yy}`;
   }
+  renderText();
+});
 
-  $('heart').style.background = `url(${ICONS[style]}) no-repeat center/contain`;
-  $('dl').disabled = false;
+/* ---------- debounced geocode (structuré) + cache ---------- */
+let state = {
+  zoom: 15,
+  lat: 48.88681, lon: 2.34302,          // Sacré-Cœur par défaut
+  key: '', cache: new Map()
+};
+
+function buildKey(){
+  return [ $('street').value.trim(), $('postal').value.trim(),
+           $('city').value.trim(), $('country').value.trim() ].join('|').toLowerCase();
 }
 
-['p1','p2','addr','date','style','showAddr','showCity','showCoords','showDate']
-.forEach(id => $(id).addEventListener('input', updatePreview));
+async function geocodeStructured(){
+  const street = $('street').value.trim(),
+        postal = $('postal').value.trim(),
+        city   = $('city').value.trim(),
+        country= $('country').value.trim();
+  // on n’essaie que si au moins ville + pays sont présents
+  if (!city || !country) return null;
 
-updatePreview();
+  const key = buildKey();
+  if (state.cache.has(key)) return state.cache.get(key);
 
-$('dl').addEventListener('click', () => {
-  const el = $('preview');
-  const opt = {
-    margin: [10,10,10,10],
-    filename: 'la-ou-tout-a-commence.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().from(el).set(opt).save();
+  const url = `/api/geocode?street=${encodeURIComponent(street)}&postalcode=${encodeURIComponent(postal)}&city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}`;
+  const r = await fetch(url);
+  if (!r.ok) return null;
+  const json = await r.json();
+  state.cache.set(key, json);
+  return json;
+}
+
+let geocodeTimer = null;
+function requestGeocode(){
+  const newKey = buildKey();
+  if (newKey === state.key) return;            // rien n’a changé
+  state.key = newKey;
+
+  clearTimeout(geocodeTimer);
+  geocodeTimer = setTimeout(async () => {
+    const res = await geocodeStructured();
+    if (res && res.lat && res.lon){
+      state.lat = res.lat; state.lon = res.lon;
+      renderMap();                             // carte vite
+      renderText();                            // texte avec ville/coordonées si cochés
+    }
+  }, 350);
+}
+
+/* ---------- rendu texte ---------- */
+function renderText(){
+  const p1 = $('p1').value.trim() || 'Jacquie';
+  const p2 = $('p2').value.trim() || 'Michel';
+  $('names').textContent = `${p1} & ${p2}`;
+
+  $('when').textContent = (showDate.checked && $('date').value.trim())
+    ? $('date').value.trim() : '';
+
+  const line1 = [];
+  if ($('showStreet').checked) line1.push($('street').value.trim());
+  $('line1').textContent = line1.join(' • ');
+
+  const line2 = [];
+  if ($('showPostal').checked) line2.push($('postal').value.trim());
+  if ($('showCity').checked)   line2.push($('city').value.trim());
+  $('line2').textContent = line2.filter(Boolean).join(' • ');
+
+  $('line3').textContent = $('showCoords').checked
+    ? `(${state.lat.toFixed(5)}, ${state.lon.toFixed(5)})` : '';
+
+  // curseur
+  $('marker').src = ICONS[$('style').value];
+}
+
+/* ---------- rendu carte (base64) ---------- */
+async function renderMap(){
+  try{
+    $('dl').disabled = true;
+    const r = await fetch(`/api/staticmap?lat=${state.lat}&lon=${state.lon}&zoom=${state.zoom}&w=1100&h=650`);
+    const { dataUrl } = await r.json();
+    $('mapimg').src = dataUrl;
+  } finally {
+    $('dl').disabled = false;
+  }
+}
+
+/* ---------- controls zoom / pan ---------- */
+function pan(deltaLat, deltaLon){
+  state.lat += deltaLat;
+  state.lon += deltaLon;
+  renderMap();
+}
+document.querySelectorAll('.map-controls button').forEach(b=>{
+  const z = b.dataset.zoom, p = b.dataset.pan;
+  b.addEventListener('click', ()=>{
+    if (z){
+      state.zoom = Math.max(12, Math.min(18, state.zoom + (z==='+'?1:-1)));
+      renderMap();
+    } else if (p){
+      // pas grand déplacement; dépend du zoom
+      const step = (p==='left'||p==='right') ? (0.002 / Math.pow(2, (state.zoom-12))) : (0.0015 / Math.pow(2,(state.zoom-12)));
+      if (p==='up') pan(step,0);
+      if (p==='down') pan(-step,0);
+      if (p==='left') pan(0,-step);
+      if (p==='right') pan(0,step);
+    }
+  });
 });
+
+/* ---------- listeners ---------- */
+['p1','p2','date','style','showStreet','showPostal','showCity','showCoords']
+  .forEach(id=>$(id).addEventListener('input', ()=>{ renderText(); }));
+
+['street','postal','city','country'].forEach(id=>{
+  $(id).addEventListener('input', requestGeocode);
+  $(id).addEventListener('change', requestGeocode);
+});
+
+/* ---------- initial load ---------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // valeurs par défaut (Sacré-Cœur)
+  $('street').value = '35 Rue du Chevalier de la Barre';
+  $('postal').value = '75018';
+  $('city').value   = 'Paris';
+  $('country').value= 'France';
+  $('marker').src = ICONS.heart;
+
+  renderText();
+  renderMap();
+});
+
+/* ---------- PDF A4 (1 page) ---------- */
+$('dl').addEventListener('click', async ()=>{
+  const A4w=794, A4h=1123;
+  const src=$('preview');
+  const clone=src.cloneNode(true);
+  Object.assign(clone.style,{position:'fixed',left:'0',top:'0',width:A4w+'px',margin:'0',transformOrigin:'top left',background:getComputedStyle(src).background||'#fff',opacity:'0',pointerEvents:'none',zIndex:'-1'});
+  document.body.appendChild(clone);
+  await new Promise(r=>requestAnimationFrame(r));
+  const h = clone.scrollHeight;
+  const scale = h>A4h ? (A4h/h) : 1;
+  clone.style.transform = `scale(${scale})`;
+  clone.style.height = (h*scale)+'px';
+
+  const opt = {
+    margin:0, filename:'la-ou-tout-a-commence.pdf',
+    image:{type:'jpeg',quality:1},
+    html2canvas:{scale:2.5,useCORS:true,allowTaint:false,windowWidth:A4w,windowHeight:A4h},
+    jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['avoid-all']}
+  };
+  await html2pdf().from(clone).set(opt).save();
+  document.body.removeChild(clone);
+});
+
+/* ---------- SW ---------- */
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
 </script>
 </body>
 </html>

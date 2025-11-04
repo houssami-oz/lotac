@@ -2,6 +2,8 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
-    { "source": "/(manifest.json)", "headers": [ { "key": "Content-Type", "value": "application/manifest+json" } ] }
+    { "source": "/manifest.json", "headers": [
+      { "key": "Content-Type", "value": "application/manifest+json" }
+    ]}
   ]
 }

@@ -21,7 +21,6 @@ function buildGoogle(lat, lon, zoom, w, h, key) {
     + `&zoom=${encodeURIComponent(zoom)}&size=${gw}x${gh}&scale=${scale}`
     + `&key=${encodeURIComponent(key)}`;
 }
-
 async function fetchAsBase64(url,label){
   const ctrl = new AbortController(); const t=setTimeout(()=>ctrl.abort(),8000);
   try{
@@ -34,7 +33,6 @@ async function fetchAsBase64(url,label){
     return { dataUrl: `data:${mime};base64,${base64}` };
   } finally { clearTimeout(t); }
 }
-
 function fallbackSvg(w,h,msg='carte indisponible'){
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
@@ -61,15 +59,15 @@ export default async function handler(req,res){
     queue.push({ url:buildOSM(lat,lon,zoom,w,h), label:'OSM' });
     queue.push({ url:buildWeserv(lat,lon,zoom,w,h), label:'WESERV' });
 
-    let dataUrl=null, source='fallback';
+    let dataUrl=null;
     for(const c of queue){
-      try{ ({dataUrl} = await fetchAsBase64(c.url, c.label)); source=c.label.toLowerCase(); break; } catch(_){}
+      try{ ({dataUrl} = await fetchAsBase64(c.url, c.label)); break; } catch(_){}
     }
-    if(!dataUrl){ dataUrl=fallbackSvg(w,h); source='fallback'; }
+    if(!dataUrl){ dataUrl=fallbackSvg(w,h); }
 
     res.setHeader('Cache-Control','no-store');
-    res.status(200).json({ dataUrl, source });
+    res.status(200).json({ dataUrl });
   }catch(e){
-    res.status(200).json({ dataUrl:fallbackSvg(1100,650), source:'fallback', note:String(e) });
+    res.status(200).json({ dataUrl:fallbackSvg(1100,650) });
   }
 }
