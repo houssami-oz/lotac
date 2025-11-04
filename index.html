@@ -46,7 +46,11 @@
     .checkline input{transform:scale(1.1);accent-color:var(--rouge)}
 
     /* preview */
+
     #preview{width:100%;background:var(--rose);border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.10);position:relative;overflow:hidden}
+    /* assure les fonds/teintes dans le rendu */
+    #preview { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    
     .corner-deco{position:absolute;opacity:.10;pointer-events:none;width:360px;height:360px;right:-100px;top:-100px;background:radial-gradient(circle,#e63946 40%,transparent 41%);filter:blur(26px)}
     .title{font-family:'Dancing Script',cursive;font-size:36px;color:var(--rouge);text-align:center;margin:0 0 12px}
     .names{text-align:center;font-size:22px;margin:2px 0 4px;font-weight:700}
@@ -337,28 +341,56 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 /* ---------- PDF A4 (1 page) ---------- */
-$('dl').addEventListener('click', async ()=>{
-  const A4w=794, A4h=1123;
-  const src=$('preview');
-  const clone=src.cloneNode(true);
-  Object.assign(clone.style,{position:'fixed',left:'0',top:'0',width:A4w+'px',margin:'0',transformOrigin:'top left',background:getComputedStyle(src).background||'#fff',opacity:'0',pointerEvents:'none',zIndex:'-1'});
-  document.body.appendChild(clone);
-  await new Promise(r=>requestAnimationFrame(r));
-  const h = clone.scrollHeight;
-  const scale = h>A4h ? (A4h/h) : 1;
-  clone.style.transform = `scale(${scale})`;
-  clone.style.height = (h*scale)+'px';
+function waitImage(imgEl){
+    return new Promise((resolve)=> {
+      if (!imgEl || imgEl.complete) return resolve();
+      imgEl.onload = imgEl.onerror = () => resolve();
+    });
+  }
 
-  const opt = {
-    margin:0, filename:'la-ou-tout-a-commence.pdf',
-    image:{type:'jpeg',quality:1},
-    html2canvas:{scale:2.5,useCORS:true,allowTaint:false,windowWidth:A4w,windowHeight:A4h},
-    jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-    pagebreak:{mode:['avoid-all']}
-  };
-  await html2pdf().from(clone).set(opt).save();
-  document.body.removeChild(clone);
-});
+  document.getElementById('dl').addEventListener('click', async () => {
+    const A4W = 794;   // pt @96dpi
+    const A4H = 1123;
+
+    const el = document.getElementById('preview');
+
+    // attendre que les polices et l’image soient prêtes
+    if (document.fonts && document.fonts.ready) {
+      try { await document.fonts.ready; } catch(e) {}
+    }
+    await waitImage(document.getElementById('mapimg'));
+
+    // mise à l’échelle temporaire
+    const original = {
+      width: el.style.width || '',
+      transform: el.style.transform || '',
+      transformOrigin: el.style.transformOrigin || ''
+    };
+    const h = el.scrollHeight;
+    const scale = h > A4H ? (A4H / h) : 1;
+
+    el.style.transformOrigin = 'top left';
+    el.style.transform = `scale(${scale})`;
+    el.style.width = (A4W / scale) + 'px';
+
+    // export PDF
+    const opt = {
+      margin: 0,
+      filename: 'la-ou-tout-a-commence.pdf',
+      image: { type: 'jpeg', quality: 1 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', removeContainer: true },
+      jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all'] }
+    };
+
+    try {
+      await html2pdf().from(el).set(opt).save();
+    } finally {
+      el.style.width = original.width;
+      el.style.transform = original.transform;
+      el.style.transformOrigin = original.transformOrigin;
+    }
+  });
 
 /* ---------- SW ---------- */
 if('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('/sw.js').catch(()=>{})); }
